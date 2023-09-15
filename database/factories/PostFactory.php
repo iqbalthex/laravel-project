@@ -19,9 +19,11 @@ class PostFactory extends Factory
     $slug = str_replace(' ', '-', $name);
 
     return [
-      ...compact('name', 'slug'),
       'category_id' => mt_rand(1, 10),
       'user_id' => mt_rand(1, 10),
+      'title' => fake()->name(),
+      'slug' => $slug,
+      'body' => fake()->paragraph(2),
     ];
   }
 }

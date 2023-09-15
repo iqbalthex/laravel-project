@@ -14,7 +14,13 @@ class PostController extends Controller {
    * Display a listing of the resource.
    */
   public function index(): View {
-    return view('posts.index');
+    $posts = Post
+      ::simplePaginate(10)
+      ->withQueryString();
+
+    return view('posts.index', compact(
+      'posts',
+    ));
   }
 
   /**

@@ -1,6 +1,6 @@
 @include('layouts.header')
 
-<nav class="h-100 d-flex flex-column flex-shrink-0 p-3 bg-body-secondary" style="width: 280px">
+<nav class="h-100 d-flex flex-column flex-shrink-0 p-3 bg-body-secondary" style="width: 200px">
   <div class="me-md-auto">
     <span class="fs-4">IQ Blog</span>
   </div>
@@ -24,8 +24,8 @@
   </ul>
 </nav>
 
-<div class="w-100">
-  <header class="d-flex justify-content-between px-4 py-3 bg-body-tertiary">
+<div class="w-100 overflow-y-scroll">
+  <header class="d-flex justify-content-between px-4 py-3 bg-body-tertiary position-sticky top-0">
     <button class="btn btn-outline-dark">
       &lt;
     </button>
@@ -45,7 +45,7 @@
   </header>
 
   <main>
-    <div class="container py-2 bg-light border border-black">
+    <div class="py-2 bg-light">
       @yield('content')
     </div>
   </main>
