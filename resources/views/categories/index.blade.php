@@ -2,6 +2,6 @@
 
 @section('content')
 
-<h1>index desu</h1>
+index
 
 @endsection

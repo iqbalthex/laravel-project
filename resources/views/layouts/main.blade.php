@@ -1,35 +1,54 @@
 @include('layouts.header')
 
-<nav class="navbar navbar-expand-lg border-bottom">
-  <div class="container-fluid">
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-      <a class="navbar-brand" href="#">Hidden brand</a>
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Link</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-        </li>
-      </ul>
-      <form class="d-flex" role="search">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-        <button class="btn btn-outline-success" type="submit">Search</button>
-      </form>
-    </div>
+<nav class="h-100 d-flex flex-column flex-shrink-0 p-3 bg-body-secondary" style="width: 280px">
+  <div class="me-md-auto">
+    <span class="fs-4">IQ Blog</span>
   </div>
+  <hr>
+
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li>
+      <a href="{{ route('posts.index') }}"
+        class="nav-link {{ Request::routeIs('posts.*') ? 'active' : 'text-body' }}">
+        {{--<svg class="bi pe-none me-2" width="16" height="16"></svg>--}}
+        Posts
+      </a>
+    </li>
+    <li>
+      <a href="{{ route('categories.index') }}"
+        class="nav-link {{ Request::routeIs('categories.*') ? 'active' : 'text-body' }}">
+        {{--<svg class="bi pe-none me-2" width="16" height="16"></svg>--}}
+        Categories
+      </a>
+    </li>
+  </ul>
 </nav>
 
-<main>
-  <div class="container-lg min-vh-100">
-    @yield('content')
-  </div>
-</main>
+<div class="w-100">
+  <header class="d-flex justify-content-between px-4 py-3 bg-body-tertiary">
+    <button class="btn btn-outline-dark">
+      &lt;
+    </button>
+
+    <div class="dropdown">
+      <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        <img @src(ru.jpg) alt="" width="32" height="32" class="rounded-circle me-2 object-fit-cover">
+        <strong>Iqbal</strong>
+      </a>
+      <ul class="dropdown-menu text-small shadow">
+        <li><a class="dropdown-item" href="#">Settings</a></li>
+        <li><a class="dropdown-item" href="#">Profile</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="#">Sign out</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <div class="container py-2 bg-light border border-black">
+      @yield('content')
+    </div>
+  </main>
+</div>
 
 @include('layouts.footer')
