@@ -41,7 +41,11 @@ class PostController extends Controller {
    * Display the specified resource.
    */
   public function show(Post $post): View {
-    return view('posts.show');
+  
+
+    return view('posts.show', compact(
+      'post',
+    ));
   }
 
   /**

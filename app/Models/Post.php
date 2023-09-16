@@ -13,6 +13,10 @@ class Post extends Model {
 
   protected $guarded = ['id'];
 
+  public function getRouteKeyName(): string {
+    return 'slug';
+  }
+
   public function category(): BelongsTo {
     return $this->belongsTo(Category::class);
   }

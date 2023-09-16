@@ -1,6 +1,6 @@
 @include('layouts.header')
 
-<nav class="h-100 d-flex flex-column flex-shrink-0 p-3 bg-body-secondary" style="width: 200px">
+<nav class="h-100 d-flex flex-column flex-shrink-0 p-3 bg-body-secondary" style="width: 200px; z-index: 10;">
   <div class="me-md-auto">
     <span class="fs-4">IQ Blog</span>
   </div>

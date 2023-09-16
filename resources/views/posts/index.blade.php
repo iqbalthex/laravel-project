@@ -30,7 +30,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  z-index: -1;
+  z-index: -10;
   transition: all .3s ease-in-out;
 }
 
@@ -66,15 +66,16 @@
   @foreach ($posts as $post)
     <div class="post col p-2 rounded-2 border"
       style="--overlay-color: {{ ['red', 'green', 'blue', 'orange', 'black'][mt_rand(0, 4)] }};">
-      <div class="d-inline-flex bg-gradient fs-2 mb-2"
+      <div class="d-inline-flex bg-gradient mb-2 px-3 fw-semibold text-white rounded"
         style="background: {{ ['red', 'green', 'blue'][mt_rand(0, 2)] }};">
         <svg class="bi" width="1em" height="1em"></svg>
+        yow
       </div>
       <h3 class="title px-2 py-1 rounded-2">{{ $post->title }}</h3>
       <p class="body w-75 px-2 overflow-hidden rounded-2">{{ $post->body }}</p>
-      <a href="{{ route('posts.show', $post->slug) }}" class="btn btn-primary">
-        Read more...
-        {{--<svg class="bi"><use xlink:href="#chevron-right"/></svg>--}}
+      <a href="{{ route('posts.show', $post->slug) }}" class="btn btn-primary d-inline-flex align-items-center">
+        Read more
+        <x-icons.bi-chevron-double-right />
       </a>
     </div>
   @endforeach

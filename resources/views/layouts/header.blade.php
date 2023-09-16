@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.bunny.net" />
 <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />
 
-<link rel="stylesheet" type="text/css" href="./assets/css/bootstrap@5.3.1.min.css" />
+<link rel="stylesheet" type="text/css" href="{{ asset('./assets/css/bootstrap@5.3.1.min.css') }}" />
 
 <style>
 .btn-toggle::before {
