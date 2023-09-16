@@ -44,12 +44,13 @@ class PostController extends Controller {
     $post->user->load([
       'posts' => fn ($query) => $query
         ->whereNot('id', $post->id)
-        ->limit(3),
+        ->limit(5),
     ]);
 
     $otherPosts = Post
       ::whereNot('user_id', $post->user_id)
-      ->limit(3)
+      ->latest('updated_at')
+      ->limit(5)
       ->get();
 
     return view('posts.show', compact(
