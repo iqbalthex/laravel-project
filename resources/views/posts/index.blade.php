@@ -48,8 +48,9 @@
 }
 
 .post h3.title,
-.post p.body {
-  background: rgba(180,180,180,var(--bg-opacity));
+.post p.body,
+.post small.author {
+  background: rgba(200,200,200,var(--bg-opacity));
 }
 
 .post h3.title {
@@ -57,9 +58,15 @@
   transition: background .3s ease-in-out;
 }
 
+{{--
 .post p.body {
   height: 1.5rem;
   transition: background .3s ease-in-out;
+}
+--}}
+
+.post small.author {
+  width: max-content;
 }
 
 @media only screen and (width > 960px) {
@@ -81,7 +88,8 @@
         yow
       </div>
       <h3 class="title px-2 py-1 rounded-2">{{ $post->title }}</h3>
-      <p class="body w-75 px-2 overflow-hidden rounded-2">{{ $post->body }}</p>
+      {{--<p class="body w-50 mb-1 px-2 overflow-hidden rounded-2">{{ $post->body }}</p>--}}
+      <small class="author d-block mb-2 px-2 rounded">by {{ $post->user->name }}</small>
       <a href="{{ route('posts.show', $post->slug) }}" class="btn btn-primary d-inline-flex align-items-center">
         Read more
         <x-icons.bi-chevron-double-right class="ms-1" />
