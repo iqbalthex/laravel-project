@@ -41,10 +41,19 @@ class PostController extends Controller {
    * Display the specified resource.
    */
   public function show(Post $post): View {
-  
+    $post->user->load([
+      'posts' => fn ($query) => $query
+        ->whereNot('id', $post->id)
+        ->limit(3),
+    ]);
+
+    $otherPosts = Post
+      ::whereNot('user_id', $post->user_id)
+      ->limit(3)
+      ->get();
 
     return view('posts.show', compact(
-      'post',
+      'post', 'otherPosts',
     ));
   }
 

@@ -25,7 +25,7 @@
 </nav>
 
 <div class="w-100 overflow-y-scroll">
-  <header class="d-flex justify-content-between px-4 py-3 bg-body-tertiary position-sticky top-0">
+  <header class="d-flex justify-content-between px-4 py-3 bg-body-tertiary position-sticky top-0" style="z-index: 20;">
     <button class="btn btn-outline-dark">
       &lt;
     </button>

@@ -21,7 +21,7 @@ class PostFactory extends Factory
     return [
       'category_id' => mt_rand(1, 10),
       'user_id' => mt_rand(1, 10),
-      'title' => fake()->name(),
+      'title' => fake()->sentence(4),
       'slug' => $slug,
       'body' => fake()->paragraph(2),
     ];

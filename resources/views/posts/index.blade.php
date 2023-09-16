@@ -38,6 +38,15 @@
   opacity: .2;
 }
 
+.post a svg {
+  width: 0;
+  transition: width .2s ease-in-out;
+}
+
+.post:hover a svg {
+  width: 16px;
+}
+
 .post h3.title,
 .post p.body {
   background: rgba(180,180,180,var(--bg-opacity));
@@ -61,7 +70,7 @@
 
 </style>
 
-<div class="container px-3">
+<div class="container">
   <div class="d-grid row-gap-2 column-gap-3 py-2">
   @foreach ($posts as $post)
     <div class="post col p-2 rounded-2 border"
@@ -75,7 +84,7 @@
       <p class="body w-75 px-2 overflow-hidden rounded-2">{{ $post->body }}</p>
       <a href="{{ route('posts.show', $post->slug) }}" class="btn btn-primary d-inline-flex align-items-center">
         Read more
-        <x-icons.bi-chevron-double-right />
+        <x-icons.bi-chevron-double-right class="ms-1" />
       </a>
     </div>
   @endforeach
