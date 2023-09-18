@@ -32,7 +32,14 @@
 .btn-toggle[aria-expanded="true"]::before {
   transform: rotate(90deg);
 }
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 </style>
+
+@stack('styles')
 
 </head>
 <body class="d-flex" style="height: 100vh">

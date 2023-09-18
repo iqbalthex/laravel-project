@@ -15,7 +15,10 @@ class PostController extends Controller {
    */
   public function index(): View {
     $posts = Post
-      ::simplePaginate(10)
+      ::with('user', 'category')
+      ->select(['category_id', 'user_id', 'id', 'title', 'body', 'slug'])
+      ->latest('posts.updated_at')
+      ->simplePaginate(10)
       ->withQueryString();
 
     return view('posts.index', compact(
@@ -27,7 +30,11 @@ class PostController extends Controller {
    * Show the form for creating a new resource.
    */
   public function create(): View {
-    return view('posts.create');
+    $categories = Category::all();
+
+    return view('posts.create', compact(
+      'categories',
+    ));
   }
 
   /**
@@ -47,14 +54,24 @@ class PostController extends Controller {
         ->limit(5),
     ]);
 
-    $otherPosts = Post
-      ::whereNot('user_id', $post->user_id)
+    $recentPosts = Post::with('user.posts')
+      ->whereNot('user_id', $post->user_id)
+      ->inRandomOrder()
+      ->limit(5)
+      ->get();
+
+
+    $otherPosts = Post::with('user.posts')
+      ->whereNot('user_id', $post->user_id)
+      ->whereNotIn('id', $recentPosts->map(fn ($post) => $post->id))
       ->latest('updated_at')
       ->limit(5)
       ->get();
 
+    // $popularPosts
+
     return view('posts.show', compact(
-      'post', 'otherPosts',
+      'post', 'recentPosts', 'otherPosts',
     ));
   }
 

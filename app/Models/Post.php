@@ -18,10 +18,14 @@ class Post extends Model {
   }
 
   public function category(): BelongsTo {
-    return $this->belongsTo(Category::class);
+    return $this
+      ->belongsTo(Category::class)
+      ->select(['id', 'name']);
   }
 
   public function user(): BelongsTo {
-    return $this->belongsTo(User::class);
+    return $this
+      ->belongsTo(User::class)
+      ->select(['id', 'name']);
   }
 }
