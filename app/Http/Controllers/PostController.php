@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Post;
+use App\Models\ {
+  Category,
+  Post,
+};
 use Illuminate\Http\ {
   RedirectResponse,
   Request,

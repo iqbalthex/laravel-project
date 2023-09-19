@@ -9,9 +9,16 @@
   <ul class="nav nav-pills flex-column mb-auto">
     <li>
       <a href="{{ route('posts.index') }}"
-        class="nav-link {{ Request::routeIs('posts.*') ? 'active' : 'text-body' }}">
+        class="nav-link {{ Request::routeIs('posts.index') ? 'active' : 'text-body' }}">
         {{--<svg class="bi pe-none me-2" width="16" height="16"></svg>--}}
         Posts
+      </a>
+    </li>
+    <li>
+      <a href="{{ route('posts.create') }}"
+        class="nav-link {{ Request::routeIs('posts.create') ? 'active' : 'text-body' }}">
+        {{--<svg class="bi pe-none me-2" width="16" height="16"></svg>--}}
+        Create Post
       </a>
     </li>
     <li>
