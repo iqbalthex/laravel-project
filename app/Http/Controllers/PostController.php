@@ -6,10 +6,12 @@ use App\Models\ {
   Category,
   Post,
 };
+use App\Http\Requests\PostRequest;
 use Illuminate\Http\ {
   RedirectResponse,
   Request,
 };
+use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 class PostController extends Controller {
@@ -44,7 +46,31 @@ class PostController extends Controller {
    * Store a newly created resource in storage.
    */
   public function store(Request $request): RedirectResponse {
-    return back();
+    $validator = Validator::make($request->all(), [
+      'user_id' => ['required', 'integer'],
+      'title' => ['required', 'string'],
+      'slug'  => ['required'],
+    ]);
+
+    if ($validator->stopOnFirstFailure()->fails()) {
+      return back()->with('alert', $this
+        ->failAlert($validator->errors()->first())
+      );
+    }
+
+    $postCreated = Post::create($request->only([
+      'category_id',
+      'user_id',
+      'title',
+      'slug',
+      'body',
+    ]));
+
+    if (!$postCreated) {
+      return back()->with('alert', $this->failAlert('Create post failed.'));
+    }
+
+    return back()->with('alert', $this->successAlert('Create post success.'));
   }
 
   /**
