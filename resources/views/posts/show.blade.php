@@ -9,7 +9,9 @@
         <h2 class="display-5 mb-1">{{ $post->title }}</h2>
         <p class="blog-post-meta">
           Last updated at {{ $post->updated_at->diffForHumans() }}
-          by <a href="#">{{ $post->user->name }}</a>
+          by <a href="{{ route('posts.index', ['author' => $post->user->id]) }}">
+            {{ $post->user->name }}
+          </a>
         </p>
 
         {{ $post->body }}
@@ -79,18 +81,22 @@
               @endfor
               </div>
               <div class="carousel-inner">
-              @foreach ($otherPosts as $otherPost)
+              @foreach ($recentPosts as $recentPost)
                 <div class="carousel-item {{ $loop->first ? 'active' : '' }}"
                   style="background: rgb({{ mt_rand(0, 255) }}, {{ mt_rand(0, 255) }}, {{ mt_rand(0, 255) }});"
                   data-bs-interval="{{ mt_rand(1500, 3000) }}">
                   <svg width="100%"></svg>
                   <div class="container pt-4">
                     <div class="carousel-caption text-start">
-                      <h3>{{ $otherPost->title }}</h3>
+                      <h3>{{ $recentPost->title }}</h3>
                       <span class="d-block mb-2">
-                        <small>by <a href="#" class="link-light">{{ $otherPost->user->name }}</a></small>
+                        <small>
+                          by <a href="{{ $recentPost->user->id }}" class="link-light">
+                            {{ $recentPost->user->name }}
+                          </a>
+                        </small>
                       </span>
-                      <a class="btn btn-primary" href="{{ route('posts.show', $otherPost->slug) }}">
+                      <a class="btn btn-primary" href="{{ route('posts.show', $recentPost->slug) }}">
                         <small>Read more...</small>
                       </a>
                     </div>
@@ -131,7 +137,11 @@
                     <div class="carousel-caption text-start">
                       <h3>{{ $otherPost->title }}</h3>
                       <span class="d-block mb-2">
-                        <small>by <a href="#" class="link-light">{{ $otherPost->user->name }}</a></small>
+                        <small>
+                          by <a href="{{ $otherPost->user->id }}" class="link-light">
+                            {{ $otherPost->user->name }}
+                          </a>
+                        </small>
                       </span>
                       <a class="btn btn-primary" href="{{ route('posts.show', $otherPost->slug) }}">
                         <small>Read more...</small>

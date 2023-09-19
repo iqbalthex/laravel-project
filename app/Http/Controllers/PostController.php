@@ -89,7 +89,6 @@ class PostController extends Controller {
       ->limit(5)
       ->get();
 
-
     $otherPosts = Post::with('user.posts')
       ->whereNot('user_id', $post->user_id)
       ->whereNotIn('id', $recentPosts->map(fn ($post) => $post->id))
