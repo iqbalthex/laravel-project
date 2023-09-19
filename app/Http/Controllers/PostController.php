@@ -66,11 +66,11 @@ class PostController extends Controller {
       'body',
     ]));
 
-    if (!$postCreated) {
-      return back()->with('alert', $this->failAlert('Create post failed.'));
+    if ($postCreated) {
+      return back()->with('alert', $this->successAlert('Create post success.'));
     }
 
-    return back()->with('alert', $this->successAlert('Create post success.'));
+    return back()->with('alert', $this->failAlert('Create post failed.'));
   }
 
   /**
@@ -121,7 +121,13 @@ class PostController extends Controller {
    * Remove the specified resource from storage.
    */
   public function destroy(Post $post): RedirectResponse {
-    return back();
+    $postDeleted = $post->delete();
+
+    if ($postDeleted) {
+      return back()->with('alert', $this->successAlert('Delete post success.'));
+    }
+
+    return back()->with('alert', $this->failAlert('Delete post failed.'));
   }
 
   /**

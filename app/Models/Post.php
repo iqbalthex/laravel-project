@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\ {
   Factories\HasFactory,
   Model,
   Relations\BelongsTo,
+  SoftDeletes,
 };
 
 class Post extends Model {
-  use HasFactory;
+  use HasFactory, SoftDeletes;
 
   protected $guarded = ['id'];
 
