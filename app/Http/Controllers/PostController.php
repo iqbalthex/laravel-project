@@ -123,4 +123,20 @@ class PostController extends Controller {
   public function destroy(Post $post): RedirectResponse {
     return back();
   }
+
+  /**
+   * Display a listing of posts wrote by user.
+   */
+  public function myPosts(): View {
+    $posts = Post
+      ::with('category')
+      ->select(['category_id', 'id', 'title', 'body', 'slug'])
+      ->latest('posts.updated_at')
+      ->simplePaginate(10)
+      ->withQueryString();
+
+    return view('posts.my-posts', compact(
+      'posts',
+    ));
+  }
 }

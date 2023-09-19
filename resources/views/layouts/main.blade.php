@@ -11,20 +11,24 @@
       <a href="{{ route('posts.index') }}"
         class="nav-link {{ Request::routeIs('posts.index') ? 'active' : 'text-body' }}">
         {{--<svg class="bi pe-none me-2" width="16" height="16"></svg>--}}
-        Posts
+        All Posts
+      </a>
+    </li>
+    <li>
+      <a href="{{ route('posts.my-posts') }}"
+        class="nav-link {{ Request::routeIs('posts.my-posts') ? 'active' : 'text-body' }}">
+        My Posts
       </a>
     </li>
     <li>
       <a href="{{ route('posts.create') }}"
         class="nav-link {{ Request::routeIs('posts.create') ? 'active' : 'text-body' }}">
-        {{--<svg class="bi pe-none me-2" width="16" height="16"></svg>--}}
         Create Post
       </a>
     </li>
     <li>
       <a href="{{ route('categories.index') }}"
         class="nav-link {{ Request::routeIs('categories.*') ? 'active' : 'text-body' }}">
-        {{--<svg class="bi pe-none me-2" width="16" height="16"></svg>--}}
         Categories
       </a>
     </li>

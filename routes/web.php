@@ -10,5 +10,6 @@ Route::get('/', function () {
   return view('welcome');
 });
 
-Route::resource('categories', CategoryController::class);
+Route::get('/posts/my-posts', [PostController::class, 'myPosts'])->name('posts.my-posts');
 Route::resource('posts', PostController::class);
+Route::resource('categories', CategoryController::class);
