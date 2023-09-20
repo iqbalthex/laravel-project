@@ -7,19 +7,19 @@ use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
 class PostPolicy {
+  public function before($user) {
+    if (!in_array($user->role, ['admin', 'member'])) {
+      return false;
+    }
+
+    return !$user->banned;
+  }
+
   /**
    * Determine whether the user can create models.
    */
   public function create(User $user): bool {
-    if (!in_array($user->role, ['admin', 'writer'])) {
-      return false;
-    }
-
-    if ($user->banned) {
-      return false;
-    }
-
-    return true;
+    //
   }
 
   /**

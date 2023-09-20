@@ -23,7 +23,7 @@
     </li>
     {{-- @endauth --}}
 
-    @can('create')
+    @can('create', App\Models\Post::class)
     <li>
       <a href="{{ route('posts.create') }}"
         class="nav-link {!! Request::routeIs('posts.create') ? 'active' : 'text-body' !!}">
