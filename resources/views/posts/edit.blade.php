@@ -6,12 +6,13 @@
   <form action="{{ route('posts.store') }}" method="post" class="row">
     @csrf
     <input type="hidden" name="user_id" value="1" />
+    <input type="hidden" name="old_image" value="{{ $post->image }}" />
     <div class="col-6">
       <div class="mb-2">
         <label class="form-label" for="title">Title</label>
         <input type="text" class="form-control"
           id="title" name="title"
-          placeholder="{{ fake()->sentence(2) }}" value="{{ old('title') }}"
+          placeholder="{{ fake()->sentence(2) }}" value="{{ old('title') ?? $post->title }}"
           required autofocus
           data-title />
       </div>
@@ -19,7 +20,7 @@
         <label class="form-label">Slug</label>
         <input type="text" class="form-control"
           name="slug"
-          value="{{ old('slug') }}"
+          value="{{ old('slug') ?? $post->slug }}"
           required readonly
           data-slug />
       </div>
@@ -27,7 +28,9 @@
         <label class="form-label" for="category">Category</label>
         <select class="form-select" id="category" name="category_id" required>
         @foreach ($categories as $category)
-          <option value="{{ $category->id }}">{{ $category->name }}</option>
+          <option value="{{ $category->id }}" @selected($category->id === $post->category->id)>
+            {{ $category->name }}
+          </option>
         @endforeach
         </select>
       </div>
@@ -43,16 +46,16 @@
         <textarea class="w-100 p-2" rows="5"
           id="body" name="body"
           placeholder="{{ fake()->sentence(10) }}">
-          {{ old('body') }}
+          {{ old('body') ?? $post->body }}
         </textarea>
       </div>
-      <a type="button" class="btn btn-secondary" href="{{ route('posts.index') }}">Back</a>
+      <a type="button" class="btn btn-secondary" href="{{ route('posts.my-posts') }}">Back</a>
       <button type="submit" class="btn btn-primary">Post</button>
     </div>
     <div class="col-6">
       <div class="mb-2">
         <label class="form-label d-block">Cover preview</label>
-        <img class="w-50 img-thumbnail" src="{{ asset('assets/image/ru.jpg') }}" alt="post-image" data-img-preview />
+        <img class="w-50 img-thumbnail" src='{{ asset("assets/image/{$post->image}") }}' alt="post-image" data-img-preview />
       </div>
     </div>
   </form>

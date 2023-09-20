@@ -107,13 +107,50 @@ class PostController extends Controller {
    * Show the form for editing the specified resource.
    */
   public function edit(Post $post): View {
-    return view('posts.edit');
+    $categories = Category::all();
+
+    $post->image = $post->image ?? 'ru.jpg';
+
+    return view('posts.edit', compact(
+      'post',
+      'categories',
+    ));
   }
 
   /**
    * Update the specified resource in storage.
    */
   public function update(Request $request, Post $post): RedirectResponse {
+    $validator = Validator::make($request->all(), [
+      'user_id' => ['required', 'integer'],
+      'title' => ['required', 'string'],
+      'slug'  => ['required'],
+      // 'image' => [],
+      // 'old-image' => [],
+    ]);
+
+    if ($validator->stopOnFirstFailure()->fails()) {
+      return back()->with('alert', $this
+        ->failAlert($validator->errors()->first())
+      );
+    }
+
+    // $request->image = $request->image ?? $request->old_image;
+
+    $postUpdated = $post->update($request->only([
+      'category_id',
+      'user_id',
+      'title',
+      'slug',
+      'body',
+    ]));
+
+    if ($postCreated) {
+      return back()->with('alert', $this->successAlert('Create post success.'));
+    }
+
+    return back()->with('alert', $this->failAlert('Create post failed.'));
+
     return back();
   }
 
