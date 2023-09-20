@@ -37,12 +37,12 @@
   opacity: .2;
 }
 
-.post a.read-more svg {
+.post .action-btn svg {
   width: 0;
   transition: width .2s ease-in-out;
 }
 
-.post:hover a.read-more svg {
+.post:hover .action-btn svg {
   width: 16px;
 }
 
@@ -98,10 +98,28 @@
           {{ $post->user->name }}
         </a>
       </small>
-      <a href="{{ route('posts.show', $post->slug) }}" class="read-more btn btn-primary d-inline-flex align-items-center">
-        Read more
-        <x-icons.bi-chevron-double-right class="ms-1" />
+
+      @php($actionBtn = 'action-btn btn d-inline-flex align-items-center')
+      <a href="{{ route('posts.show', $post->slug) }}" class="{{ $actionBtn }} btn-dark">
+        Read more <x-icons.bi-chevron-double-right class="ms-1" />
       </a>
+
+      @can('update', $post)
+        <a href="{{ route('posts.edit', $post->slug) }}" class="{{ $actionBtn }} btn-primary">
+          Edit <x-icons.bi-chevron-double-right class="ms-1" />
+        </a>
+      @endcan
+
+      @can('delete', $post)
+        <form action="{{ route('posts.destroy', $post->slug) }}" method="post" class="d-inline">
+          @csrf
+          @method('DELETE')
+          <button type="submit" class="{{ $actionBtn }} btn-danger" onclick="return confirm('Are you sure?')">
+            Delete <x-icons.bi-chevron-double-right class="ms-1" />
+          </button>
+        </form>
+      @endcan
+
     </div>
   @endforeach
   </div>

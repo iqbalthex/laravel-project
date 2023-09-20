@@ -9,26 +9,31 @@
   <ul class="nav nav-pills flex-column mb-auto">
     <li>
       <a href="{{ route('posts.index') }}"
-        class="nav-link {{ Request::routeIs('posts.index') ? 'active' : 'text-body' }}">
+        class="nav-link {!! Request::routeIs('posts.index') ? 'active' : 'text-body' !!}">
         {{--<svg class="bi pe-none me-2" width="16" height="16"></svg>--}}
         All Posts
       </a>
     </li>
+    {{-- @auth --}}
     <li>
       <a href="{{ route('posts.my-posts') }}"
-        class="nav-link {{ Request::routeIs('posts.my-posts') ? 'active' : 'text-body' }}">
+        class="nav-link {!! Request::routeIs('posts.my-posts') ? 'active' : 'text-body' !!}">
         My Posts
       </a>
     </li>
+    {{-- @endauth --}}
+
+    @can('create')
     <li>
       <a href="{{ route('posts.create') }}"
-        class="nav-link {{ Request::routeIs('posts.create') ? 'active' : 'text-body' }}">
+        class="nav-link {!! Request::routeIs('posts.create') ? 'active' : 'text-body' !!}">
         Create Post
       </a>
     </li>
+    @endcan
     <li>
       <a href="{{ route('categories.index') }}"
-        class="nav-link {{ Request::routeIs('categories.*') ? 'active' : 'text-body' }}">
+        class="nav-link {!! Request::routeIs('categories.*') ? 'active' : 'text-body' !!}">
         Categories
       </a>
     </li>
@@ -50,7 +55,14 @@
         <li><a class="dropdown-item" href="#">Settings</a></li>
         <li><a class="dropdown-item" href="#">Profile</a></li>
         <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item" href="#">Sign out</a></li>
+        {{-- @auth --}}
+        <li>
+          <form action="{{ route('logout') }}" method="post">
+            @csrf
+            <button type="submit" class="dropdown-item">Sign out</button>
+          </form>
+        </li>
+        {{-- @endauth --}}
       </ul>
     </div>
   </header>
