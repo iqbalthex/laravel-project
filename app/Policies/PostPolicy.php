@@ -12,14 +12,16 @@ class PostPolicy {
       return false;
     }
 
-    return !$user->banned;
+    if ($user->banned) {
+      return false;
+    }
   }
 
   /**
    * Determine whether the user can create models.
    */
   public function create(User $user): bool {
-    //
+    return true;
   }
 
   /**
