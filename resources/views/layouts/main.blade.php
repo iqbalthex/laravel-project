@@ -67,7 +67,7 @@
     </div>
   </header>
 
-  <main class="h-100 bg-light">
+  <main class="h-100">
     <div class="py-2">
       @yield('content')
     </div>

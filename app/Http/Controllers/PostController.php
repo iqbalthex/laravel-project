@@ -20,11 +20,13 @@ class PostController extends Controller {
    */
   public function index(): View {
     $posts = Post
-      ::with('user', 'category')
+      ::with(['category', 'user.followers'])
       ->select(['category_id', 'user_id', 'id', 'title', 'body', 'slug'])
       ->latest('posts.updated_at')
       ->simplePaginate(10)
       ->withQueryString();
+
+    // dump($posts[0]->user->followers->count());
 
     return view('posts.index', compact(
       'posts',
