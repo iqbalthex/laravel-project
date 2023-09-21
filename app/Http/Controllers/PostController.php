@@ -26,6 +26,14 @@ class PostController extends Controller {
       ->simplePaginate(10)
       ->withQueryString();
 
+    foreach ($posts as $post) {
+      $post->liked = in_array(auth()->user()->id,
+        $post->likes
+          ->map(fn ($like) => $like->user_id)
+          ->toArray()
+      );
+    }
+
     return view('posts.index', compact(
       'posts',
     ));
@@ -66,7 +74,7 @@ class PostController extends Controller {
     ]);
 
     $postCreated = Post::create([
-      ...$data
+      ...$data,
       'excerpt' => substr($data['body'], 0, 30),
     ]);
 
@@ -149,7 +157,7 @@ class PostController extends Controller {
     ]);
 
     $postUpdated = $post->update([
-      ...$data
+      ...$data,
       'excerpt' => substr($data['body'], 0, 30),
     ]);
 

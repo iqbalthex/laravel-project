@@ -115,11 +115,12 @@
 
         <div class="d-flex flex-column justify-content-end gap-1">
           <button class="btn btn-danger px-1 py-0">
-            <span>Icon</span>
+            <x-icons.bi-heart class="{{ $post->liked ? 'd-none' : '' }}" />
+            <x-icons.bi-heart-fill class="{{ $post->liked ? '' : 'd-none' }}" />
             <span class="border-start px-1">{{ $post->likes->count() }}</span>
           </button>
           <button class="btn btn-info px-1 py-0">
-            <span>Icon</span>
+            <x-icons.bi-chat-dots />
             <span class="border-start px-1">{{ $post->user->followers->count() }}</span>
           </button>
         </div>
