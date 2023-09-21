@@ -29,4 +29,8 @@ class Post extends Model {
       ->belongsTo(User::class)
       ->select(['id', 'name']);
   }
+
+  public function likes() {
+    return $this->hasMany(Like::class)->select('post_id');
+  }
 }

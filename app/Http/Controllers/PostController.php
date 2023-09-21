@@ -21,12 +21,10 @@ class PostController extends Controller {
   public function index(): View {
     $posts = Post
       ::with(['category', 'user.followers'])
-      ->select(['category_id', 'user_id', 'id', 'title', 'body', 'slug'])
+      ->select(['category_id', 'user_id', 'id', 'title', 'body', 'slug', 'excerpt'])
       ->latest('posts.updated_at')
       ->simplePaginate(10)
       ->withQueryString();
-
-    // dump($posts[0]->user->followers->count());
 
     return view('posts.index', compact(
       'posts',
@@ -54,19 +52,23 @@ class PostController extends Controller {
       'slug'  => ['required'],
     ]);
 
-    if ($validator->stopOnFirstFailure()->fails()) {
-      return back()->with('alert', $this
+    if ($validator->stopOnFirstFailure()->fails()) return back()
+      ->with('alert', $this
         ->failAlert($validator->errors()->first())
       );
-    }
 
-    $postCreated = Post::create($request->only([
+    $data = $request->only([
       'category_id',
       'user_id',
       'title',
       'slug',
       'body',
-    ]));
+    ]);
+
+    $postCreated = Post::create([
+      ...$data
+      'excerpt' => substr($data['body'], 0, 30),
+    ]);
 
     if ($postCreated) {
       return back()->with('alert', $this->successAlert('Create post success.'));
@@ -131,29 +133,31 @@ class PostController extends Controller {
       // 'old-image' => [],
     ]);
 
-    if ($validator->stopOnFirstFailure()->fails()) {
-      return back()->with('alert', $this
+    if ($validator->stopOnFirstFailure()->fails()) return back()
+      ->with('alert', $this
         ->failAlert($validator->errors()->first())
       );
-    }
 
     // $request->image = $request->image ?? $request->old_image;
 
-    $postUpdated = $post->update($request->only([
+    $data = $request->only([
       'category_id',
       'user_id',
       'title',
       'slug',
       'body',
-    ]));
+    ]);
 
-    if ($postCreated) {
+    $postUpdated = $post->update([
+      ...$data
+      'excerpt' => substr($data['body'], 0, 30),
+    ]);
+
+    if ($postUpdated) {
       return back()->with('alert', $this->successAlert('Create post success.'));
     }
 
     return back()->with('alert', $this->failAlert('Create post failed.'));
-
-    return back();
   }
 
   /**

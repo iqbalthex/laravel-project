@@ -82,13 +82,13 @@
             {{ $post->category->name }}
           </a>
           <h3 class="title px-2 py-1 rounded-2">{{ $post->title }}</h3>
-          {{--<p class="body w-50 mb-1 px-2 overflow-hidden rounded-2">{{ $post->excerpt }}</p>--}}
           <small class="author d-block mb-2 px-2 rounded">
             by
             <a class="text-decoration-none badge pb-2 bg-secondary" href="{{ route('posts.index', ['author' => $post->user->id]) }}">
               {{ $post->user->name }}
             </a>
           </small>
+          <p class="body w-50 mb-1 px-2 overflow-hidden rounded-2">{{ $post->excerpt }}...</p>
 
           @php($actionBtn = 'action-btn btn d-inline-flex align-items-center')
           <a href="{{ route('posts.show', $post->slug) }}" class="{{ $actionBtn }} btn-dark">
@@ -116,7 +116,7 @@
         <div class="d-flex flex-column justify-content-end gap-1">
           <button class="btn btn-danger px-1 py-0">
             <span>Icon</span>
-            <span class="border-start px-1">{{ mt_rand(10, 100) }}</span>
+            <span class="border-start px-1">{{ $post->likes->count() }}</span>
           </button>
           <button class="btn btn-info px-1 py-0">
             <span>Icon</span>
