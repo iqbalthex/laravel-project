@@ -49,18 +49,6 @@ class User extends Authenticatable {
     return $this->hasMany(Post::class);
   }
 
-  /*
-  SELECT name -- Get name of user with id IN {ex-result}
-  FROM users
-  WHERE id IN (
-    -- Get follower_ids first. (ex-result: [3, 5, 6, 8])
-    SELECT follower_id
-    FROM users
-    JOIN followers
-      ON users.id = followers.user_id
-    WHERE users.id = 1
-  )
-  */
   public function followers(): BelongsToMany {
     return $this
       ->belongsToMany(User::class, 'followers', 'user_id', 'follower_id')

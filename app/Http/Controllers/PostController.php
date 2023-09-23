@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ {
   Category,
+  Like,
   Post,
 };
 use App\Http\Requests\PostRequest;
@@ -26,13 +27,12 @@ class PostController extends Controller {
       ->simplePaginate(10)
       ->withQueryString();
 
-    foreach ($posts as $post) {
-      $post->liked = in_array(auth()->user()->id,
-        $post->likes
-          ->map(fn ($like) => $like->user_id)
-          ->toArray()
+    foreach ($posts as &$post) {
+      $post->liked = in_array(auth()->user()->id, $post->likes
+        ->map(fn ($like) => $like->user_id)
+        ->toArray()
       );
-    }
+    };
 
     return view('posts.index', compact(
       'posts',
@@ -181,19 +181,30 @@ class PostController extends Controller {
     return back()->with('alert', $this->failAlert('Delete post failed.'));
   }
 
-  /**
-   * Display a listing of posts wrote by user.
-   */
-  public function myPosts(): View {
-    $posts = Post
-      ::with('category')
-      ->select(['category_id', 'id', 'title', 'body', 'slug'])
-      ->latest('posts.updated_at')
-      ->simplePaginate(10)
-      ->withQueryString();
+  public function like(Request $request) {
+    try {
+      Like::firstOrCreate($request->only([
+        'user_id', 'post_id',
+      ]));
 
-    return view('posts.my-posts', compact(
-      'posts',
-    ));
+      return response()->noContent();
+
+    } catch (\Exception $err) {
+      return response()->noContent(500);
+    }    
+  }
+
+  public function unlike(Request $request) {
+    try {
+      Like::where($request->only([
+        'user_id', 'post_id',
+      ]))
+        ->delete();
+
+      return response()->noContent();
+
+    } catch (\Exception $err) {
+      return response()->noContent(500);
+    }
   }
 }

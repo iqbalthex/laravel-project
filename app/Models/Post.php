@@ -31,6 +31,8 @@ class Post extends Model {
   }
 
   public function likes() {
-    return $this->hasMany(Like::class)->select(['user_id', 'post_id']);
+    return $this
+      ->hasMany(Like::class)
+      ->select(['user_id', 'post_id']);
   }
 }

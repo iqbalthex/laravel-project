@@ -123,8 +123,9 @@
         </div>
 
         <div class="d-flex flex-column justify-content-end gap-1">
-          <button class="d-flex px-1 py-0 btn {{ $post->liked ? 'btn-outline-dark' : 'btn-outline-danger' }}"
+          <button class="d-flex px-1 py-0 btn btn-outline-{{ $post->liked ? 'secondary' : 'danger' }}"
             onclick="toggleLike(this)"
+            data-liked="{{ $post->liked ? 'true' : 'false' }}"
             data-post-id="{{ $post->id }}">
             <span class="w-100 h-100 d-flex justify-content-center align-items-center position-relative" style="">
               <x-icons.bi-heart-fill />
@@ -147,63 +148,57 @@
 @push('scripts')
 <script>
 
-@php($userId = auth()->user()->id)
-
 function toggleLike(target) {
-  if (target.classList.contains('btn-outline-dark')) {
-    unlike(target.dataset.postId);
-    target.classList.replace('btn-outline-dark', 'btn-outline-danger');
-    return;
-  }
+  target.disabled = true;
 
-  like(target.dataset.postId);
-  target.classList.replace('btn-outline-danger', 'btn-outline-dark');
+  target.dataset.liked
+    ? unlike(target)
+    : like(target);
 }
 
+const user_id = {{ auth()->user()->id }};
 const token = document.querySelector('input[name="_token"]');
+const headers = {
+  'X-CSRF-TOKEN': token.value,
+  'Content-Type': 'application/json',
+};
 
-function like(post_id) {
+function like(target) {
   const url  = `{{ route('posts.like') }}`;
   const body = JSON.stringify({
-    user_id: {{ $userId }},
-    post_id,
+    user_id,
+    post_id: target.dataset.postId,
   });
-  const headers = {
-    'X-CSRF-TOKEN': token.value,
-    'Content-Type': 'application/json',
-  };
 
   fetch(url, { headers, method: 'PATCH', body })
-    .then(({ ok }) => {
-      if (ok) {
-        console.log('like success');
+    .then(res => {
+      if (res.ok) {
+        target.classList.replace('btn-outline-danger', 'btn-outline-secondary');
+        target.dataset.liked = true;
         return;
       }
-
-      console.log('like fail');
     })
-    .catch(err => console.error(err));
+    .catch(err => console.error(err))
+    .finally(() => (target.disabled = undefined));
 }
 
-function unlike(post_id) {
+function unlike(target) {
   const url  = `{{ route('posts.unlike') }}`;
   const body = JSON.stringify({
-    user_id: {{ $userId }},
-    post_id,
+    user_id,
+    post_id: target.dataset.postId,
   });
-  const headers = {
-    'X-CSRF-TOKEN': token.value,
-    'Content-Type': 'application/json',
-  };
 
   fetch(url, { headers, method: 'PATCH', body })
-    .then(response => response.json())
-    .then(json => {
-      console.log(json);
-    });
-    // .catch(err => {
-      // console.error(err);
-    // });
+    .then(res => {
+      if (res.ok) {
+        target.classList.replace('btn-outline-secondary', 'btn-outline-danger');
+        target.dataset.liked = false;
+        return;
+      }
+    })
+    .catch(err => console.error(err))
+    .finally(() => (target.disabled = undefined));
 }
 
 </script>
