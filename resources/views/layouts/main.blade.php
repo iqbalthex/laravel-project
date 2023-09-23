@@ -14,14 +14,6 @@
         All Posts
       </a>
     </li>
-    {{-- @auth --}}
-    <li>
-      <a href="{{ route('posts.my-posts') }}"
-        class="nav-link {!! Request::routeIs('posts.my-posts') ? 'active' : 'text-body' !!}">
-        My Posts
-      </a>
-    </li>
-    {{-- @endauth --}}
 
     @can('create', App\Models\Post::class)
     <li>

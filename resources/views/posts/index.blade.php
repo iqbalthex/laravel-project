@@ -57,6 +57,15 @@
   width: max-content;
 }
 
+.btn-outline-danger .bi-heart-fill {
+  color: #777;
+}
+
+.btn-outline-secondary .bi-heart-fill {
+  color: #f77;
+}
+
+
 @media only screen and (width > 960px) {
   .d-grid {
     grid-template-columns: 1fr 1fr;
@@ -70,7 +79,7 @@
 
 <div class="container">
   <div class="d-grid row-gap-2 column-gap-3 py-2">
-  @foreach ($posts as $post)
+  @foreach ($posts as &$post)
     <div class="post col d-flex align-items-end rounded-2 border"
       style="--overlay-color: {{ ['red', 'green', 'blue', 'orange', 'black'][mt_rand(0, 4)] }};">
       <div class="w-100 p-2 d-flex justify-content-between" style="background: rgba(240,240,240,var(--bg-opacity))">
@@ -114,14 +123,17 @@
         </div>
 
         <div class="d-flex flex-column justify-content-end gap-1">
-          <button class="btn btn-danger px-1 py-0">
-            <x-icons.bi-heart class="{{ $post->liked ? 'd-none' : '' }}" />
-            <x-icons.bi-heart-fill class="{{ $post->liked ? '' : 'd-none' }}" />
-            <span class="border-start px-1">{{ $post->likes->count() }}</span>
+          <button class="d-flex px-1 py-0 btn {{ $post->liked ? 'btn-outline-dark' : 'btn-outline-danger' }}"
+            onclick="toggleLike(this)"
+            data-post-id="{{ $post->id }}">
+            <span class="w-100 h-100 d-flex justify-content-center align-items-center position-relative" style="">
+              <x-icons.bi-heart-fill />
+            </span>
+            <span class="px-1 fw-bold">{{ $post->likes->count() }}</span>
           </button>
           <button class="btn btn-info px-1 py-0">
             <x-icons.bi-chat-dots />
-            <span class="border-start px-1">{{ $post->user->followers->count() }}</span>
+            <span class="px-1 fw-bold">{{ $post->user->followers->count() }}</span>
           </button>
         </div>
       </div>
@@ -131,3 +143,68 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+
+@php($userId = auth()->user()->id)
+
+function toggleLike(target) {
+  if (target.classList.contains('btn-outline-dark')) {
+    unlike(target.dataset.postId);
+    target.classList.replace('btn-outline-dark', 'btn-outline-danger');
+    return;
+  }
+
+  like(target.dataset.postId);
+  target.classList.replace('btn-outline-danger', 'btn-outline-dark');
+}
+
+const token = document.querySelector('input[name="_token"]');
+
+function like(post_id) {
+  const url  = `{{ route('posts.like') }}`;
+  const body = JSON.stringify({
+    user_id: {{ $userId }},
+    post_id,
+  });
+  const headers = {
+    'X-CSRF-TOKEN': token.value,
+    'Content-Type': 'application/json',
+  };
+
+  fetch(url, { headers, method: 'PATCH', body })
+    .then(({ ok }) => {
+      if (ok) {
+        console.log('like success');
+        return;
+      }
+
+      console.log('like fail');
+    })
+    .catch(err => console.error(err));
+}
+
+function unlike(post_id) {
+  const url  = `{{ route('posts.unlike') }}`;
+  const body = JSON.stringify({
+    user_id: {{ $userId }},
+    post_id,
+  });
+  const headers = {
+    'X-CSRF-TOKEN': token.value,
+    'Content-Type': 'application/json',
+  };
+
+  fetch(url, { headers, method: 'PATCH', body })
+    .then(response => response.json())
+    .then(json => {
+      console.log(json);
+    });
+    // .catch(err => {
+      // console.error(err);
+    // });
+}
+
+</script>
+@endpush

@@ -6,13 +6,39 @@
   <div class="row g-3">
     <div class="col-md-8">
       <article class="blog-post">
-        <h2 class="display-5 mb-1">{{ $post->title }}</h2>
-        <p class="blog-post-meta">
-          Last updated at {{ $post->updated_at->diffForHumans() }}
-          by <a href="{{ route('posts.index', ['author' => $post->user->id]) }}">
-            {{ $post->user->name }}
-          </a>
-        </p>
+        <div class="d-flex justify-content-between">
+          <div>
+            <h2 class="display-5 mb-1">{{ $post->title }}</h2>
+            <p class="blog-post-meta">
+              Last updated at {{ $post->updated_at->diffForHumans() }} by
+              @if ($post->user->id === auth()->user()->id)
+                you
+              @else
+                <a href="{{ route('posts.index', ['author' => $post->user->id]) }}">
+                  {{ $post->user->name }}
+                </a>
+              @endif
+            </p>
+          </div>
+          <div class="d-flex flex-column gap-2">
+            @php($actionBtn = 'action-btn btn d-inline-flex align-items-center')
+            @can('update', $post)
+              <a href="{{ route('posts.edit', $post->slug) }}?from=show" class="{{ $actionBtn }} btn-primary">
+                Edit
+              </a>
+            @endcan
+
+            @can('delete', $post)
+              <form action="{{ route('posts.destroy', $post->slug) }}" method="post">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="{{ $actionBtn }} btn-danger" onclick="return confirm('Are you sure?')">
+                  Delete
+                </button>
+              </form>
+            @endcan
+          </div>
+        </div>
 
         {{ $post->body }}
       </article>
@@ -25,9 +51,13 @@
           <div>
             <h4 class="fst-italic">
               Recents by
-              <a href="{{ route('posts.index', ['author' => $post->user->id]) }}">
-                {{ $post->user->name }}
-              </a>
+              @if ($post->user->id === auth()->user()->id)
+                you
+              @else
+                <a href="{{ route('posts.index', ['author' => $post->user->id]) }}">
+                  {{ $post->user->name }}
+                </a>
+              @endif
             </h4>
             <div id="user-posts" class="carousel slide mb-6" data-bs-ride="carousel">
               <div class="carousel-indicators">

@@ -49,7 +49,12 @@
           {{ old('body') ?? $post->body }}
         </textarea>
       </div>
-      <a type="button" class="btn btn-secondary" href="{{ route('posts.my-posts') }}">Back</a>
+      <a type="button" class="btn btn-secondary"
+        href="{{ request('from') === 'show'
+          ? route('posts.show', $post->id)
+          : route('posts.index') }}">
+        Back
+      </a>
       <button type="submit" class="btn btn-primary">Post</button>
     </div>
     <div class="col-6">
