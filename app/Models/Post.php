@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\ {
   Factories\HasFactory,
   Model,
   Relations\BelongsTo,
+  Relations\HasMany,
   SoftDeletes,
 };
 
@@ -30,9 +31,16 @@ class Post extends Model {
       ->select(['id', 'name']);
   }
 
-  public function likes() {
+  public function likes(): HasMany {
     return $this
       ->hasMany(Like::class)
       ->select(['user_id', 'post_id']);
+  }
+  
+  public function comments(): HasMany {
+    return $this
+      ->HasMany(Comment::class)
+      ->orderByDesc('created_at')
+      ->limit(5);
   }
 }

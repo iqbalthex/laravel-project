@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ {
   Category,
+  Comment,
   Like,
   Post,
 };
@@ -90,8 +91,9 @@ class PostController extends Controller {
    * Display the specified resource.
    */
   public function show(Post $post): View {
-    $post->user->load([
-      'posts' => fn ($query) => $query
+    $post->load([
+      'comments.user',
+      'user.posts' => fn ($query) => $query
         ->whereNot('id', $post->id)
         ->limit(5),
     ]);
@@ -108,8 +110,6 @@ class PostController extends Controller {
       ->latest('updated_at')
       ->limit(5)
       ->get();
-
-    // $popularPosts
 
     return view('posts.show', compact(
       'post', 'recentPosts', 'otherPosts',

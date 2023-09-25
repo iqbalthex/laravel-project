@@ -42,6 +42,21 @@
 
         {{ $post->body }}
       </article>
+
+      <div id="comments" class="mt-4 p-1 bg-light bg-gradient border">
+        <h5 class="mb-2">Comments</h5>
+        <ul class="list-unstyled">
+        @foreach ($post->comments as $comment)
+          <li class="border px-2 pt-1 mb-2">
+            <h6>
+              {{ $comment->user->name }}
+              <i class="fw-normal">({{ $comment->created_at?->diffForHumans() }})</i>
+            </h6>
+            <p class="mb-2">{{ $comment->body }}</p>
+          </li>
+        @endforeach
+        </ul>
+      </div>
     </div>
 
     <div class="col-md-4">
