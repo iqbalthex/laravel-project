@@ -27,8 +27,9 @@ class PostController extends Controller {
       ->simplePaginate(10)
       ->withQueryString();
 
+    $userId = auth()->user()->id;
     foreach ($posts as &$post) {
-      $post->liked = in_array(auth()->user()->id, $post->likes
+      $post->liked = in_array($userId, $post->likes
         ->map(fn ($like) => $like->user_id)
         ->toArray()
       );
@@ -183,11 +184,11 @@ class PostController extends Controller {
 
   public function like(Request $request) {
     try {
-      Like::firstOrCreate($request->only([
-        'user_id', 'post_id',
-      ]));
+      Like::firstOrCreate($request->only([ 'user_id', 'post_id' ]));
 
-      return response()->noContent();
+      $likeCount = Like::where('post_id', $request->post_id)->count();
+
+      return response(compact('likeCount'), 200);
 
     } catch (\Exception $err) {
       return response()->noContent(500);
@@ -196,15 +197,19 @@ class PostController extends Controller {
 
   public function unlike(Request $request) {
     try {
-      Like::where($request->only([
-        'user_id', 'post_id',
-      ]))
+      Like::where($request->only([ 'user_id', 'post_id' ]))
         ->delete();
 
-      return response()->noContent();
+      $likeCount = Like::where('post_id', $request->post_id)->count();
+
+      return response(compact('likeCount'), 200);
 
     } catch (\Exception $err) {
       return response()->noContent(500);
     }
+  }
+
+  private function countLike($postId) {
+    return Like::where('post_id', $postId)->count();
   }
 }

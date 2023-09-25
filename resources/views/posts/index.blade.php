@@ -125,12 +125,12 @@
         <div class="d-flex flex-column justify-content-end gap-1">
           <button class="d-flex px-1 py-0 btn btn-outline-{{ $post->liked ? 'secondary' : 'danger' }}"
             onclick="toggleLike(this)"
-            data-liked="{{ $post->liked ? 'true' : 'false' }}"
+            data-liked="{{ $post->liked ? 1 : 0 }}"
             data-post-id="{{ $post->id }}">
             <span class="w-100 h-100 d-flex justify-content-center align-items-center position-relative" style="">
               <x-icons.bi-heart-fill />
             </span>
-            <span class="px-1 fw-bold">{{ $post->likes->count() }}</span>
+            <span class="px-1 fw-bold" data-like-count>{{ $post->likes->count() }}</span>
           </button>
           <button class="btn btn-info px-1 py-0">
             <x-icons.bi-chat-dots />
@@ -151,13 +151,13 @@
 function toggleLike(target) {
   target.disabled = true;
 
-  target.dataset.liked
+  target.dataset.liked == 1
     ? unlike(target)
     : like(target);
 }
 
 const user_id = {{ auth()->user()->id }};
-const token = document.querySelector('input[name="_token"]');
+const token   = document.querySelector('input[name="_token"]');
 const headers = {
   'X-CSRF-TOKEN': token.value,
   'Content-Type': 'application/json',
@@ -174,13 +174,18 @@ function like(target) {
     .then(res => {
       if (res.ok) {
         target.classList.replace('btn-outline-danger', 'btn-outline-secondary');
-        target.dataset.liked = true;
-        return;
+        target.dataset.liked = '1';
+        return res.json();
       }
+    })
+    .then(json => {
+      const likeCount = target.querySelector('[data-like-count]');
+      likeCount.innerText = json.likeCount;
     })
     .catch(err => console.error(err))
     .finally(() => (target.disabled = undefined));
 }
+
 
 function unlike(target) {
   const url  = `{{ route('posts.unlike') }}`;
@@ -193,9 +198,13 @@ function unlike(target) {
     .then(res => {
       if (res.ok) {
         target.classList.replace('btn-outline-secondary', 'btn-outline-danger');
-        target.dataset.liked = false;
-        return;
+        target.dataset.liked = '0';
+        return res.json();
       }
+    })
+    .then(json => {
+      const likeCount = target.querySelector('[data-like-count]');
+      likeCount.innerText = json.likeCount;
     })
     .catch(err => console.error(err))
     .finally(() => (target.disabled = undefined));
