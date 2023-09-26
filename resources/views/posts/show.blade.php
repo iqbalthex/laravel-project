@@ -43,14 +43,27 @@
         {{ $post->body }}
       </article>
 
-      <div id="comments" class="mt-4 p-1 bg-light bg-gradient border">
+      <div id="comments" class="mt-4 p-1 pt-2 bg-light bg-gradient border">
         <h5 class="mb-2">Comments</h5>
-        <ul class="list-unstyled">
+        <div class="mb-2">
+          <textarea class="form-control" placeholder="Write a comment..." oninput="typing()" data-comment-input></textarea>
+          <button class="btn btn-primary mt-2 mb-3" onclick="storeComment()" disabled data-submit-btn>Comment</button>
+          <button class="btn btn-danger mt-2 mb-3" onclick="cancelComment()" disabled data-cancel-btn>Cancel</button>
+        </div>
+        <ul class="list-unstyled" data-comments>
         @foreach ($post->comments as $comment)
+          @php($updated = ($comment->created_at != $comment->updated_at)
+            ? "(Updated {$comment->updated_at->diffForHumans()})"
+            : '')
           <li class="border px-2 pt-1 mb-2">
-            <h6>
-              {{ $comment->user->name }}
-              <i class="fw-normal">({{ $comment->created_at?->diffForHumans() }})</i>
+            <h6 class="d-flex justify-content-between">
+              <span>
+                {{ $comment->user->name }}
+                <i class="fw-normal">{{ $updated }}</i>
+              </span>
+              <span class="fw-normal">
+                {{ $comment->created_at->format('Y-m-d h:i') }}
+              </span>
             </h6>
             <p class="mb-2">{{ $comment->body }}</p>
           </li>
@@ -213,3 +226,112 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+
+let commentData = @json($post->comments);
+commentData.sort((c1, c2) => (c1.created_at - c2.created_at));
+
+const commentInput = $data('comment-input');
+const submitBtn = $data('submit-btn');
+const cancelBtn = $data('cancel-btn');
+let typingTimeout;
+
+function typing() {
+  clearTimeout(typingTimeout);
+
+  typingTimeout = setTimeout(() => {
+    if (commentInput.value.length > 0) {
+      enable(submitBtn);
+      enable(cancelBtn);
+      return;
+    }
+
+    disable(submitBtn);
+    disable(cancelBtn);
+  }, 400);
+}
+
+
+const commentWrapper = $data('comments');
+const loading = document.createElement('li');
+
+function storeComment() {
+  const tempCommentData = commentData;
+  const token = $('input[name="_token"]');
+  const headers = {
+    'Content-Type': 'application/json',
+    'X-CSRF-TOKEN': token.value,
+  }
+  const body = JSON.stringify({
+    user_id: {{ auth()->user()->id }},
+    post_id: {{ $post->id }},
+    body: commentInput.value,
+  });
+
+  loading.innerHTML = '<li class="border px-2 pt-1 mb-2">Loading...</li>';
+  commentWrapper.prepend(loading);
+
+  disable(commentInput);
+  disable(submitBtn);
+
+  fetch("{{ route('comments.store') }}", {
+    headers, method: 'POST', body,
+  }).then(res => res.json())
+    .then(json => {
+      commentData = json.comments;
+      commentInput.value = '';
+      disable(cancelBtn);
+    })
+    .catch(err => {
+      console.error(err);
+      commentData = tempCommentData;
+      commentWrapper.removeChild(loading);
+
+      enable(submitBtn);
+    })
+    .finally(() => {
+      enable(commentInput);
+
+      renderComment();
+    });
+}
+
+function cancelComment() {
+  commentInput.value = '';
+
+  disable(submitBtn);
+  disable(cancelBtn);
+}
+
+function renderComment() {
+  commentData.sort((c1, c2) => {
+    const c1Time = new Date(c1.created_at);
+    const c2Time = new Date(c2.created_at);
+    return c2Time.getTime() - c1Time.getTime();
+  });
+
+  let content = '';
+  commentData.forEach(comment => {
+    const updated = (comment.created_at !== comment.updated_at)
+      ? `(Updated ${comment.updated})`
+      : '';
+
+    content += `<li class="border px-2 pt-1 mb-2">
+      <h6 class="d-flex justify-content-between">
+        <span>
+          ${comment.user.name}
+          <i class="fw-normal">${updated}</i>
+        </span>
+        <span class="fw-normal">${comment.created}</span>
+      </h6>
+      <p class="mb-2">${comment.body}</p>
+    </li>`;
+  });
+
+  commentWrapper.innerHTML = content;
+}
+
+</script>
+@endpush

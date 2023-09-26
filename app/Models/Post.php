@@ -41,6 +41,6 @@ class Post extends Model {
     return $this
       ->HasMany(Comment::class)
       ->orderByDesc('created_at')
-      ->limit(5);
+      ->limit(15);
   }
 }

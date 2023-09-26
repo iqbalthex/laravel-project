@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ {
   CategoryController,
+  CommentController,
   PostController,
   UserController,
 };
@@ -15,4 +16,5 @@ Route::middleware('auth')->group(function () {
 
   Route::resource('posts', PostController::class);
   Route::resource('categories', CategoryController::class);
+  Route::resource('comments', CommentController::class)->only(['store', 'update', 'destroy']);
 });
