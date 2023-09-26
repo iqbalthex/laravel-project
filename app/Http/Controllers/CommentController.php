@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comment;
+use App\Models\User;
 use Illuminate\Http\ { Response, Request };
 use Illuminate\Support\Facades\ {
   DB,
@@ -31,7 +32,7 @@ class CommentController extends Controller {
       DB::commit();
 
       return response([
-        'comments' => $this->refetchComments($comment->post_id),
+        'comments' => $this->refetchComments($comment->user_id, $comment->post_id),
       ], 201);
 
     } catch (\Exception $e) {
@@ -61,7 +62,7 @@ class CommentController extends Controller {
     //
   }
 
-  private function refetchComments($post_id) {
+  private function refetchComments(int $user_id, int $post_id) {
     $comments = Comment
       ::with(['user'])
       ->where('post_id', $post_id)
@@ -69,10 +70,15 @@ class CommentController extends Controller {
       ->limit(15)
       ->get();
 
-    foreach ($comments as &$comment) {
-      $comment->created = $comment->created_at->format('Y-m-d h:i');
-      $comment->updated = $comment->updated_at->diffForHumans();
-      // $comment->canUpdate = $comment->user->can('update');
+    $user = User::find($user_id);
+
+    foreach ($comments as $comment) {
+      $comment->createdStr = $comment->created_at->format('Y-m-d h:i');
+      $comment->updatedStr = $comment->updated_at->diffForHumans();
+
+      $comment->canReply  = $user->can('reply',  $comment);
+      $comment->canUpdate = $user->can('update', $comment);
+      $comment->canDelete = $user->can('delete', $comment);
     }
 
     return $comments;

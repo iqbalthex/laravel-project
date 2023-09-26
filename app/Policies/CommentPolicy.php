@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
 class CommentPolicy {
+  static int $i = 0;
+
   public function before($user) {
     if (!in_array($user->role, ['admin', 'member'])) {
       return false;

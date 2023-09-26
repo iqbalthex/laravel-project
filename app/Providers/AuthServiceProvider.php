@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Modles\ { Comment, Post };
 use App\Policies\ { CommentPolicy, PostPolicy };
 // use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;

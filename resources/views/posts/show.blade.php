@@ -47,8 +47,8 @@
         <h5 class="mb-2">Comments</h5>
         <div class="mb-2">
           <textarea class="form-control" placeholder="Write a comment..." oninput="typing()" data-comment-input></textarea>
-          <button class="btn btn-primary mt-2 mb-3" onclick="storeComment()" disabled data-submit-btn>Comment</button>
-          <button class="btn btn-danger mt-2 mb-3" onclick="cancelComment()" disabled data-cancel-btn>Cancel</button>
+          <button class="btn btn-primary mt-2 mb-3 px-2 py-0" onclick="storeComment()" disabled data-submit-btn>Comment</button>
+          <button class="btn btn-danger mt-2 mb-3 px-2 py-0" onclick="cancelComment()" disabled data-cancel-btn>Cancel</button>
         </div>
         <ul class="list-unstyled" data-comments>
         @foreach ($post->comments as $comment)
@@ -68,10 +68,13 @@
             <p class="mb-2">{{ $comment->body }}</p>
 
           @can('reply', $comment)
-            <button class="btn btn-secondary mb-2" onclick="createReply(this)">Reply</button>
-          @elsecan('update', $comment)
-            <button class="btn btn-primary mb-2" onclick="editComment(this)">Edit</button>
-            <button class="btn btn-danger mb-2" onclick="destroyComment(this)">Delete</button>
+            <button class="btn btn-secondary mb-2 px-2 py-0" onclick="createReply(this)">Reply</button>
+          @endcan
+          @can('update', $comment)
+            <button class="btn btn-primary mb-2 px-2 py-0" onclick="editComment(this)">Edit</button>
+          @endcan
+          @can('delete', $comment)
+            <button class="btn btn-danger mb-2 px-2 py-0" onclick="destroyComment(this)">Delete</button>
           @endcan
 
           </li>
@@ -233,6 +236,10 @@
   </div>
 </div>
 
+<template id="comment-reply">
+  <p>tes</p>
+</template>
+
 @endsection
 
 @push('scripts')
@@ -323,8 +330,12 @@ function renderComment() {
   let content = '';
   commentData.forEach(comment => {
     const updated = (comment.created_at !== comment.updated_at)
-      ? `(Updated ${comment.updated})`
+      ? `(Updated ${comment.updatedStr})`
       : '';
+
+    const replyBtn  = comment.canReply  ? '<button class="btn btn-secondary mb-2 px-2 py-0" onclick="createReply(this)">Reply</button>' : '';
+    const updateBtn = comment.canUpdate ? '<button class="btn btn-primary mb-2 px-2 py-0" onclick="editComment(this)">Edit</button>' : '';
+    const deleteBtn = comment.canDelete ? '<button class="btn btn-danger mb-2 px-2 py-0" onclick="destroyComment(this)">Delete</button>' : '';
 
     content += `<li class="border px-2 pt-1 mb-2">
       <h6 class="d-flex justify-content-between">
@@ -332,17 +343,35 @@ function renderComment() {
           ${comment.user.name}
           <i class="fw-normal">${updated}</i>
         </span>
-        <span class="fw-normal">${comment.created}</span>
+        <span class="fw-normal">${comment.createdStr}</span>
       </h6>
       <p class="mb-2">${comment.body}</p>
+
+      ${replyBtn}
+      ${updateBtn}
+      ${deleteBtn}
     </li>`;
   });
 
   commentWrapper.innerHTML = content;
 }
 
+// const commentReplyInput = $('#comment-reply');
+
 function createReply(btn) {
-  
+  const comment   = btn.parentNode;
+  const commentId = comment.dataset.commentId;
+
+  const replyInput = document.createElement('div');
+  replyInput.innerHTML = '<textarea class="form-control mb-2"></textarea>';
+
+  comment.querySelector('p').after(replyInput);
+
+  btn.onclick = storeReply;
+}
+
+function storeReply({ target }) {
+  {{-- fetch("{{ route('replies.store') }}") --}}
 }
 
 function editComment(btn) {
