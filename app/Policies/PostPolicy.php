@@ -44,11 +44,4 @@ class PostPolicy {
   public function restore(User $user, Post $post): bool {
     //
   }
-
-  /**
-   * Determine whether the user can permanently delete the model.
-   */
-  public function forceDelete(User $user, Post $post): bool {
-    //
-  }
 }

@@ -55,7 +55,7 @@
           @php($updated = ($comment->created_at != $comment->updated_at)
             ? "(Updated {$comment->updated_at->diffForHumans()})"
             : '')
-          <li class="border px-2 pt-1 mb-2">
+          <li class="border px-2 pt-1 mb-2" data-comment-id="{{ $comment->id }}">
             <h6 class="d-flex justify-content-between">
               <span>
                 {{ $comment->user->name }}
@@ -66,6 +66,14 @@
               </span>
             </h6>
             <p class="mb-2">{{ $comment->body }}</p>
+
+          @can('reply', $comment)
+            <button class="btn btn-secondary mb-2" onclick="createReply(this)">Reply</button>
+          @elsecan('update', $comment)
+            <button class="btn btn-primary mb-2" onclick="editComment(this)">Edit</button>
+            <button class="btn btn-danger mb-2" onclick="destroyComment(this)">Delete</button>
+          @endcan
+
           </li>
         @endforeach
         </ul>
@@ -331,6 +339,18 @@ function renderComment() {
   });
 
   commentWrapper.innerHTML = content;
+}
+
+function createReply(btn) {
+  
+}
+
+function editComment(btn) {
+  
+}
+
+function destroyComment(btn) {
+  
 }
 
 </script>

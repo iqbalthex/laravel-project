@@ -72,6 +72,7 @@ class CommentController extends Controller {
     foreach ($comments as &$comment) {
       $comment->created = $comment->created_at->format('Y-m-d h:i');
       $comment->updated = $comment->updated_at->diffForHumans();
+      // $comment->canUpdate = $comment->user->can('update');
     }
 
     return $comments;
