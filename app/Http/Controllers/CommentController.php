@@ -8,6 +8,7 @@ use Illuminate\Http\ {
   Response,
   Request,
 };
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\ {
   DB,
   Log,
@@ -28,6 +29,7 @@ class CommentController extends Controller {
       'body'    => ['required', 'string'],
     ]);
 
+    // Return error when fails to validate the request.
     if ($validator->stopOnFirstFailure()->fails()) return response([
       'error' => $validator->errors()->first(),
     ], 400);
@@ -38,7 +40,7 @@ class CommentController extends Controller {
       DB::commit();
 
       return response([
-        'comments' => $this->refetchComments($comment->user_id, $comment->post_id),
+        'comments' => $this->fetchComments($comment->user_id, $comment->post_id),
       ], 201);
 
     } catch (\Exception $e) {
@@ -68,7 +70,14 @@ class CommentController extends Controller {
     //
   }
 
-  private function refetchComments(int $user_id, int $post_id) {
+  /**
+   * Get the latest 15 comments.
+   *
+   * @param   int  $user_id
+   * @param   int  $post_id
+   * @return  Illuminate\Database\Eloquent\Collection  $comments
+   */
+  private function fetchComments(int $user_id, int $post_id): Collection {
     $comments = Comment
       ::with(['user'])
       ->where('post_id', $post_id)
