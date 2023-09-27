@@ -173,17 +173,17 @@ function like(target) {
   fetch(url, { headers, method: 'PATCH', body })
     .then(res => {
       if (res.ok) {
+        // change button state
         target.classList.replace('btn-outline-danger', 'btn-outline-secondary');
         target.dataset.liked = '1';
         return res.json();
       }
     })
     .then(json => {
-      const likeCount = target.querySelector('[data-like-count]');
-      likeCount.innerText = json.likeCount;
+      updateLikeCount(target, json.likeCount);
     })
     .catch(err => console.error(err))
-    .finally(() => (target.disabled = undefined));
+    .finally(() => enable(target));
 }
 
 
@@ -197,17 +197,22 @@ function unlike(target) {
   fetch(url, { headers, method: 'PATCH', body })
     .then(res => {
       if (res.ok) {
+        // change button state
         target.classList.replace('btn-outline-secondary', 'btn-outline-danger');
         target.dataset.liked = '0';
         return res.json();
       }
     })
     .then(json => {
-      const likeCount = target.querySelector('[data-like-count]');
-      likeCount.innerText = json.likeCount;
+      updateLikeCount(target, json.likeCount);
     })
     .catch(err => console.error(err))
-    .finally(() => (target.disabled = undefined));
+    .finally(() => enable(target));
+}
+
+function updateLikeCount(target, likeCount) {
+  const likeCount = target.querySelector('[data-like-count]');
+  likeCount.innerText = likeCount;
 }
 
 </script>
