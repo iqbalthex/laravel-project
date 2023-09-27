@@ -7,9 +7,13 @@ use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
 class CommentPolicy {
-  static int $i = 0;
-
-  public function before($user) {
+  /**
+   * Perform pre-authorization checks.
+   *
+   * @param   App\Models\User  $user
+   * @return  bool|void
+   */
+  public function before(User $user): bool|void {
     if (!in_array($user->role, ['admin', 'member'])) {
       return false;
     }
@@ -21,6 +25,9 @@ class CommentPolicy {
 
   /**
    * Determine whether the user can create comment.
+   *
+   * @param   App\Models\User  $user
+   * @return  bool
    */
   public function create(User $user): bool {
     // limit 3 comment per post per day
@@ -29,6 +36,10 @@ class CommentPolicy {
 
   /**
    * Determine whether the user can reply comment.
+   *
+   * @param   App\Models\User     $user
+   * @param   App\Models\Comment  $comment
+   * @return  bool
    */
   public function reply(User $user, Comment $comment): bool {
     return $user->id !== $comment->user_id;
@@ -36,6 +47,10 @@ class CommentPolicy {
 
   /**
    * Determine whether the user can update the comment.
+   *
+   * @param   App\Models\User     $user
+   * @param   App\Models\Comment  $comment
+   * @return  bool
    */
   public function update(User $user, Comment $comment): bool {
     return $user->id === $comment->user_id;
@@ -43,6 +58,10 @@ class CommentPolicy {
 
   /**
    * Determine whether the user can delete the comment.
+   *
+   * @param   App\Models\User     $user
+   * @param   App\Models\Comment  $comment
+   * @return  bool
    */
   public function delete(User $user, Comment $comment): bool {
     return $user->id === $comment->user_id;
