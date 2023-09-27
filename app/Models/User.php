@@ -45,10 +45,20 @@ class User extends Authenticatable {
     'password' => 'hashed',
   ];
 
+  /**
+   * Get the posts for the user.
+   *
+   * @return Illuminate\Database\Eloquent\Relations\HasMany
+   */
   public function posts(): HasMany{
     return $this->hasMany(Post::class);
   }
 
+  /**
+   * The followers that belong to the user.
+   *
+   * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
+   */
   public function followers(): BelongsToMany {
     return $this
       ->belongsToMany(User::class, 'followers', 'user_id', 'follower_id')

@@ -20,7 +20,7 @@ class PostController extends Controller {
   /**
    * Display a list of posts.
    *
-   * @return  Illuminate\View\View
+   * @return Illuminate\View\View
    */
   public function index(): View {
     $posts = Post
@@ -49,7 +49,7 @@ class PostController extends Controller {
   /**
    * Show the form for creating a new post.
    *
-   * @return  Illuminate\View\View
+   * @return Illuminate\View\View
    */
   public function create(): View {
     $categories = Category::all();
