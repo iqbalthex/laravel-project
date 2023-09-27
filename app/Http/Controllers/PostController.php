@@ -18,7 +18,9 @@ use Illuminate\View\View;
 
 class PostController extends Controller {
   /**
-   * Display a listing of the resource.
+   * Display a list of posts.
+   *
+   * @return  Illuminate\View\View
    */
   public function index(): View {
     $posts = Post
@@ -29,10 +31,13 @@ class PostController extends Controller {
       ->withQueryString();
 
     $userId = auth()->user()->id;
+
     foreach ($posts as &$post) {
-      $post->liked = in_array($userId, $post->likes
-        ->map(fn ($like) => $like->user_id)
-        ->toArray()
+      // Is authenticated user like the post.
+      $post->liked = in_array($userId,
+        $post->likes
+          ->map(fn ($like) => $like->user_id)
+          ->toArray()
       );
     };
 
@@ -42,7 +47,9 @@ class PostController extends Controller {
   }
 
   /**
-   * Show the form for creating a new resource.
+   * Show the form for creating a new post.
+   *
+   * @return  Illuminate\View\View
    */
   public function create(): View {
     $categories = Category::all();
@@ -53,7 +60,10 @@ class PostController extends Controller {
   }
 
   /**
-   * Store a newly created resource in storage.
+   * Store a new post in storage.
+   *
+   * @param   Illuminate\Http\Request  $request
+   * @return  Illuminate\Http\RedirectResponse
    */
   public function store(Request $request): RedirectResponse {
     $validator = Validator::make($request->all(), [
@@ -62,10 +72,10 @@ class PostController extends Controller {
       'slug'  => ['required'],
     ]);
 
-    if ($validator->stopOnFirstFailure()->fails()) return back()
-      ->with('alert', $this
-        ->failAlert($validator->errors()->first())
-      );
+    // Redirect and return error alert when fails to validate the request.
+    if ($validator->stopOnFirstFailure()->fails()) {
+      return back()->with('alert', $this->failAlert($validator->errors()->first()));
+    }
 
     $data = $request->only([
       'category_id',
@@ -88,9 +98,13 @@ class PostController extends Controller {
   }
 
   /**
-   * Display the specified resource.
+   * Display the specified post.
+   *
+   * @param   App\Models\Post  $post
+   * @return  Illuminate\View\View
    */
   public function show(Post $post): View {
+    // Eager load the relations.
     $post->load([
       'comments.user',
       'user.posts' => fn ($query) => $query
@@ -98,15 +112,17 @@ class PostController extends Controller {
         ->limit(5),
     ]);
 
+    // Recent posts.
     $recentPosts = Post::with('user.posts')
       ->whereNot('user_id', $post->user_id)
-      ->inRandomOrder()
       ->limit(5)
       ->get();
 
+    // Get 5 posts randomly.
     $otherPosts = Post::with('user.posts')
       ->whereNot('user_id', $post->user_id)
       ->whereNotIn('id', $recentPosts->map(fn ($post) => $post->id))
+      ->inRandomOrder()
       ->latest('updated_at')
       ->limit(5)
       ->get();
@@ -117,7 +133,10 @@ class PostController extends Controller {
   }
 
   /**
-   * Show the form for editing the specified resource.
+   * Show the form for editing the specified post.
+   *
+   * @param   App\Models\Post  $post
+   * @return  Illuminate\View\View
    */
   public function edit(Post $post): View {
     $categories = Category::all();
@@ -132,6 +151,10 @@ class PostController extends Controller {
 
   /**
    * Update the specified resource in storage.
+   *
+   * @param   Illuminate\Http\Request  $request
+   * @param   App\Models\Post          $post
+   * @return  Illuminate\Http\RedirectResponse
    */
   public function update(Request $request, Post $post): RedirectResponse {
     $validator = Validator::make($request->all(), [
@@ -142,10 +165,10 @@ class PostController extends Controller {
       // 'old-image' => [],
     ]);
 
-    if ($validator->stopOnFirstFailure()->fails()) return back()
-      ->with('alert', $this
-        ->failAlert($validator->errors()->first())
-      );
+    // Redirect and return error alert when fails to validate the request.
+    if ($validator->stopOnFirstFailure()->fails()) {
+      return back()->with('alert', $this->failAlert($validator->errors()->first()));
+    }
 
     // $request->image = $request->image ?? $request->old_image;
 
@@ -170,7 +193,10 @@ class PostController extends Controller {
   }
 
   /**
-   * Remove the specified resource from storage.
+   * Remove the specified post from storage.
+   *
+   * @param   App\Models\Post  $post
+   * @return  Illuminate\Http\RedirectResponse
    */
   public function destroy(Post $post): RedirectResponse {
     $postDeleted = $post->delete();
@@ -182,11 +208,17 @@ class PostController extends Controller {
     return back()->with('alert', $this->failAlert('Delete post failed.'));
   }
 
-  public function like(Request $request) {
+  /**
+   * Add like to specified post.
+   *
+   * @param   Illuminate\Http\Request  $request
+   * @return  Illuminate\Http\RedirectResponse
+   */
+  public function like(Request $request): RedirectResponse {
     try {
-      Like::firstOrCreate($request->only([ 'user_id', 'post_id' ]));
+      Like::create($request->only([ 'user_id', 'post_id' ]));
 
-      $likeCount = Like::where('post_id', $request->post_id)->count();
+      $likeCount = $this->countLike($request->post_id);
 
       return response(compact('likeCount'), 200);
 
@@ -195,12 +227,18 @@ class PostController extends Controller {
     }    
   }
 
-  public function unlike(Request $request) {
+  /**
+   * Remove like from specified post.
+   *
+   * @param   Illuminate\Http\Request  $request
+   * @return  Illuminate\Http\RedirectResponse
+   */
+  public function unlike(Request $request): RedirectResponse {
     try {
       Like::where($request->only([ 'user_id', 'post_id' ]))
         ->delete();
 
-      $likeCount = Like::where('post_id', $request->post_id)->count();
+      $likeCount = $this->countLike($request->post_id);
 
       return response(compact('likeCount'), 200);
 
@@ -209,7 +247,13 @@ class PostController extends Controller {
     }
   }
 
-  private function countLike($postId) {
+  /**
+   * Count like from specified post.
+   *
+   * @param   int  $postId
+   * @return  int
+   */
+  private function countLike(int $postId): int {
     return Like::where('post_id', $postId)->count();
   }
 }

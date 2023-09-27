@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\ {
 
 class CommentController extends Controller {
   /**
-   * Store a new comments.
+   * Store a new comment in storage.
    *
    * @param   Illuminate\Http\Request  $request
    * @return  Illuminate\Http\Response
@@ -30,9 +30,11 @@ class CommentController extends Controller {
     ]);
 
     // Return error when fails to validate the request.
-    if ($validator->stopOnFirstFailure()->fails()) return response([
-      'error' => $validator->errors()->first(),
-    ], 400);
+    if ($validator->stopOnFirstFailure()->fails()) {
+      return response([
+        'error' => $validator->errors()->first()
+      ], 400);
+    }
 
     DB::beginTransaction();
     try {
