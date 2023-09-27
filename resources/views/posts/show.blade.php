@@ -270,11 +270,15 @@ function typing() {
 
 
 const commentWrapper = $data('comments');
+
+// Placeholder for incoming comment.
 const loading = document.createElement('li');
+loading.innerHTML = '<li class="border px-2 pt-1 mb-2">Loading...</li>';
 
 function storeComment() {
+  // Preparing backup to anticipate fails when storing comment.
   const tempCommentData = commentData;
-  const token = $('input[name="_token"]');
+  const token   = $('input[name="_token"]');
   const headers = {
     'Content-Type': 'application/json',
     'X-CSRF-TOKEN': token.value,
@@ -285,7 +289,6 @@ function storeComment() {
     body: commentInput.value,
   });
 
-  loading.innerHTML = '<li class="border px-2 pt-1 mb-2">Loading...</li>';
   commentWrapper.prepend(loading);
 
   disable(commentInput);
@@ -295,12 +298,15 @@ function storeComment() {
     headers, method: 'POST', body,
   }).then(res => res.json())
     .then(json => {
+      // Update commentData.
       commentData = json.comments;
       commentInput.value = '';
       disable(cancelBtn);
     })
     .catch(err => {
       console.error(err);
+
+      // Backup commentData.
       commentData = tempCommentData;
       commentWrapper.removeChild(loading);
 
@@ -313,6 +319,7 @@ function storeComment() {
     });
 }
 
+// Reset comment input.
 function cancelComment() {
   commentInput.value = '';
 
@@ -329,10 +336,12 @@ function renderComment() {
 
   let content = '';
   commentData.forEach(comment => {
+    // Determine if comment was updated.
     const updated = (comment.created_at !== comment.updated_at)
       ? `(Updated ${comment.updatedStr})`
       : '';
 
+    // Checking for authorization.
     const replyBtn  = comment.canReply  ? '<button class="btn btn-secondary mb-2 px-2 py-0" onclick="createReply(this)">Reply</button>' : '';
     const updateBtn = comment.canUpdate ? '<button class="btn btn-primary mb-2 px-2 py-0" onclick="editComment(this)">Edit</button>' : '';
     const deleteBtn = comment.canDelete ? '<button class="btn btn-danger mb-2 px-2 py-0" onclick="destroyComment(this)">Delete</button>' : '';

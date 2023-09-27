@@ -173,7 +173,7 @@ function like(target) {
   fetch(url, { headers, method: 'PATCH', body })
     .then(res => {
       if (res.ok) {
-        // change button state
+        // Update button state.
         target.classList.replace('btn-outline-danger', 'btn-outline-secondary');
         target.dataset.liked = '1';
         return res.json();
@@ -197,7 +197,7 @@ function unlike(target) {
   fetch(url, { headers, method: 'PATCH', body })
     .then(res => {
       if (res.ok) {
-        // change button state
+        // Update button state.
         target.classList.replace('btn-outline-secondary', 'btn-outline-danger');
         target.dataset.liked = '0';
         return res.json();

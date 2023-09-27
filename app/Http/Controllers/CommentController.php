@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use App\Models\User;
-use Illuminate\Http\ { Response, Request };
+use Illuminate\Http\ {
+  Response,
+  Request,
+};
 use Illuminate\Support\Facades\ {
   DB,
   Log,
@@ -13,7 +16,10 @@ use Illuminate\Support\Facades\ {
 
 class CommentController extends Controller {
   /**
-   * Store a newly created resource in storage.
+   * Store a new comments.
+   *
+   * @param   Illuminate\Http\Request  $request
+   * @return  Illuminate\Http\Response
    */
   public function store(Request &$request): Response {
     $validator = Validator::make($request->all(), [
