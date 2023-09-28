@@ -3,8 +3,12 @@
 
 const $ = q => document.querySelector(q);
 const $data = q => document.querySelector(`[data-${q}]`);
+
 const enable  = e => e.removeAttribute('disabled');
 const disable = e => e.setAttribute('disabled', true);
+
+const show = e => e.classList.remove('d-none');
+const hide = e => e.classList.add('d-none');
 
 @if ($alert = session('alert'))
   alert("{{ $alert['text'] }}");

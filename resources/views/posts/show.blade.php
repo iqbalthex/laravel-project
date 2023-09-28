@@ -48,7 +48,7 @@
         <div class="mb-2">
           <textarea class="form-control" placeholder="Write a comment..." oninput="typing()" data-comment-input></textarea>
           <button class="btn btn-primary mt-2 mb-3 px-2 py-0" onclick="storeComment()" disabled data-submit-btn>Comment</button>
-          <button class="btn btn-danger mt-2 mb-3 px-2 py-0" onclick="cancelComment()" disabled data-cancel-btn>Cancel</button>
+          <button class="btn btn-secondary mt-2 mb-3 px-2 py-0" onclick="cancelComment()" disabled data-cancel-btn>Cancel</button>
         </div>
         <ul class="list-unstyled" data-comments>
         @foreach ($post->comments as $comment)
@@ -68,13 +68,19 @@
             <p class="mb-2">{{ $comment->body }}</p>
 
           @can('reply', $comment)
-            <button class="btn btn-secondary mb-2 px-2 py-0" onclick="createReply(this)">Reply</button>
+            <button class="btn btn-dark mb-2 px-2 py-0" onclick="createReply(this)">Reply</button>
+            <button class="btn btn-primary mb-2 px-2 py-0 d-none" onclick="storeReply(this)" data-reply-btn>Reply</button>
+            <button class="btn btn-secondary mb-2 px-2 py-0 d-none" onclick="cancelReply(this)" data-cancel-reply-btn>Cancel</button>
           @endcan
-          @can('update', $comment)
-            <button class="btn btn-primary mb-2 px-2 py-0" onclick="editComment(this)">Edit</button>
-          @endcan
-          @can('delete', $comment)
-            <button class="btn btn-danger mb-2 px-2 py-0" onclick="destroyComment(this)">Delete</button>
+
+          @can('modify', $comment)
+            <button class="btn btn-primary mb-2 px-2 py-0" onclick="editComment(this)" data-edit-btn>Edit</button>
+            <button class="btn btn-primary mb-2 px-2 py-0 d-none" onclick="updateComment(this)" data-save-btn>Save</button>
+            <button class="btn btn-secondary mb-2 px-2 py-0 d-none" onclick="cancelEdit(this)" data-cancel-edit-btn>Cancel</button>
+
+            <button class="btn btn-danger mb-2 px-2 py-0" onclick="deleteComment(this)" data-delete-btn>Delete</button>
+            <button class="btn btn-danger mb-2 px-2 py-0 d-none" onclick="destroyComment(this)" data-destroy-btn>Delete this comment</button>
+            <button class="btn btn-secondary mb-2 px-2 py-0 d-none" onclick="cancelDelete(this)" data-cancel-delete-btn>Cancel</button>
           @endcan
 
           </li>
@@ -343,8 +349,8 @@ function renderComment() {
 
     // Checking for authorization.
     const replyBtn  = comment.canReply  ? '<button class="btn btn-secondary mb-2 px-2 py-0" onclick="createReply(this)">Reply</button>' : '';
-    const updateBtn = comment.canUpdate ? '<button class="btn btn-primary mb-2 px-2 py-0" onclick="editComment(this)">Edit</button>' : '';
-    const deleteBtn = comment.canDelete ? '<button class="btn btn-danger mb-2 px-2 py-0" onclick="destroyComment(this)">Delete</button>' : '';
+    const updateBtn = comment.canModify ? '<button class="btn btn-primary mb-2 px-2 py-0" onclick="editComment(this)">Edit</button>' : '';
+    const deleteBtn = comment.canModify ? '<button class="btn btn-danger mb-2 px-2 py-0" onclick="destroyComment(this)">Delete</button>' : '';
 
     content += `<li class="border px-2 pt-1 mb-2">
       <h6 class="d-flex justify-content-between">
@@ -384,11 +390,60 @@ function storeReply({ target }) {
 }
 
 function editComment(btn) {
+  const parent = btn.parentNode;
+  const deleteBtn = parent.querySelector('[data-delete-btn]');
+  const saveBtn   = parent.querySelector('[data-save-btn]');
+  const cancelBtn = parent.querySelector('[data-cancel-edit-btn]');
+
+  hide(btn);
+  hide(deleteBtn);
+  show(saveBtn);
+  show(cancelBtn);
+}
+
+function updateComment(btn) {
   
+}
+
+function cancelEdit(btn) {
+  const parent = btn.parentNode;
+  const saveBtn   = parent.querySelector('[data-save-btn]');
+  const editBtn   = parent.querySelector('[data-edit-btn]');
+  const deleteBtn = parent.querySelector('[data-delete-btn]');
+
+  hide(btn);
+  hide(saveBtn);
+  show(editBtn);
+  show(deleteBtn);
+}
+
+
+function deleteComment(btn) {
+  const parent = btn.parentNode;
+  const editBtn    = parent.querySelector('[data-edit-btn]');
+  const destroyBtn = parent.querySelector('[data-destroy-btn]');
+  const cancelBtn  = parent.querySelector('[data-cancel-delete-btn]');
+
+  hide(btn);
+  hide(editBtn);
+  show(destroyBtn);
+  show(cancelBtn);
 }
 
 function destroyComment(btn) {
   
+}
+
+function cancelDelete(btn) {
+  const parent = btn.parentNode;
+  const destroyBtn = parent.querySelector('[data-destroy-btn]');
+  const editBtn    = parent.querySelector('[data-edit-btn]');
+  const deleteBtn  = parent.querySelector('[data-delete-btn]');
+
+  hide(btn);
+  hide(destroyBtn);
+  show(editBtn);
+  show(deleteBtn);
 }
 
 </script>

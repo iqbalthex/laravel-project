@@ -94,8 +94,7 @@ class CommentController extends Controller {
       $comment->updatedStr = $comment->updated_at->diffForHumans();
 
       $comment->canReply  = $user->can('reply',  $comment);
-      $comment->canUpdate = $user->can('update', $comment);
-      $comment->canDelete = $user->can('delete', $comment);
+      $comment->canModify = $user->can('modify', $comment);
     }
 
     return $comments;
