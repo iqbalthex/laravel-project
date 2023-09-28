@@ -22,7 +22,7 @@ class CommentController extends Controller {
    * @param   Illuminate\Http\Request  $request
    * @return  Illuminate\Http\Response
    */
-  public function store(Request &$request): Response {
+  public function store(Request $request): Response {
     $validator = Validator::make($request->all(), [
       'user_id' => ['required', 'integer'],
       'post_id' => ['required', 'integer'],
@@ -32,7 +32,7 @@ class CommentController extends Controller {
     // Return error when fails to validate the request.
     if ($validator->stopOnFirstFailure()->fails()) {
       return response([
-        'error' => $validator->errors()->first()
+        'error' => $validator->errors()->first(),
       ], 400);
     }
 
@@ -60,9 +60,49 @@ class CommentController extends Controller {
 
   /**
    * Update the specified resource in storage.
+   *
+   * @param   Illuminate\Http\Request  $request
+   * @param   App\Models\Comment       $comment?
+   * @return  Illuminate\Http\Response
    */
-  public function update(Request $request, Comment $comment) {
-    //
+  public function update(Request $request, ?Comment $comment): Response {
+    $validator = Validator::make($request->all(), [
+      'user_id' => ['required', 'integer'],
+      'body'    => ['required', 'string'],
+    ]);
+
+    // Return error when fails to validate the request.
+    if ($validator->stopOnFirstFailure()->fails()) {
+      return response([
+        'error' => $validator->errors()->first(),
+      ], 400);
+    }
+
+    // Return error when user is not allowed to modify comment.
+    if (User::find($request->user_id)->cannot('modify', $comment)) {
+      abort(403);
+    }
+
+    DB::beginTransaction();
+    try {
+      $comment->update($request->only(['body']));
+      DB::commit();
+
+      return response([
+        'comments' => $this->fetchComments($comment->user_id, $comment->post_id),
+      ], 200);
+
+    } catch (\Exception $e) {
+      DB::rollBack();
+
+      $error = $e->getMessage();
+      return response(compact('error'), 500);
+
+    } finally {
+      $comment->makeHidden(['created_at', 'updated_at', 'created', 'updated']);
+
+      Log::info('Comment updated', compact('comment'));
+    }
   }
 
   /**
