@@ -46,9 +46,9 @@
       <div id="comments" class="mt-4 p-1 pt-2 bg-light bg-gradient border">
         <h5 class="mb-2">Comments</h5>
         <div class="mb-2">
-          <textarea class="form-control" placeholder="Write a comment..." oninput="typing()" data-comment-input></textarea>
-          <button class="btn btn-primary mt-2 mb-3 px-2 py-0" onclick="storeComment()" disabled data-submit-btn>Comment</button>
-          <button class="btn btn-secondary mt-2 mb-3 px-2 py-0" onclick="cancelComment()" disabled data-cancel-btn>Cancel</button>
+          <textarea class="form-control" placeholder="Write a comment..." oninput="typing(this)" data-comment-input></textarea>
+          <button class="btn btn-primary mt-2 mb-3 px-2 py-0" onclick="storeComment(this)" disabled data-submit-btn>Comment</button>
+          <button class="btn btn-secondary mt-2 mb-3 px-2 py-0" onclick="cancelComment(this)" disabled data-cancel-btn>Cancel</button>
         </div>
         <ul class="list-unstyled" data-comments>
         @foreach ($post->comments as $comment)
@@ -69,14 +69,14 @@
 
           @can('reply', $comment)
             <button class="btn btn-dark mb-2 px-2 py-0" onclick="createReply(this)">Reply</button>
-            <button class="btn btn-primary mb-2 px-2 py-0 d-none" onclick="storeReply(this)" data-reply-btn>Reply</button>
-            <button class="btn btn-secondary mb-2 px-2 py-0 d-none" onclick="cancelReply(this)" data-cancel-reply-btn>Cancel</button>
+            <button class="btn btn-primary mb-2 px-2 py-0 d-none" onclick="storeReply(this)" disabled data-reply-btn>Reply</button>
+            <button class="btn btn-secondary mb-2 px-2 py-0 d-none" onclick="cancelReply(this)" disabled data-cancel-reply-btn>Cancel</button>
           @endcan
 
           @can('modify', $comment)
             <button class="btn btn-primary mb-2 px-2 py-0" onclick="editComment(this)" data-edit-btn>Edit</button>
-            <button class="btn btn-primary mb-2 px-2 py-0 d-none" onclick="updateComment(this)" data-save-btn>Save</button>
-            <button class="btn btn-secondary mb-2 px-2 py-0 d-none" onclick="cancelEdit(this)" data-cancel-edit-btn>Cancel</button>
+            <button class="btn btn-primary mb-2 px-2 py-0 d-none" onclick="updateComment(this)" disabled data-submit-btn>Save</button>
+            <button class="btn btn-secondary mb-2 px-2 py-0 d-none" onclick="cancelEdit(this)" disabled data-cancel-btn>Cancel</button>
 
             <button class="btn btn-danger mb-2 px-2 py-0" onclick="deleteComment(this)" data-delete-btn>Delete</button>
             <button class="btn btn-danger mb-2 px-2 py-0 d-none" onclick="destroyComment(this)" data-destroy-btn>Delete this comment</button>
@@ -251,19 +251,28 @@
 @push('scripts')
 <script>
 
+const token = $('input[name="_token"]');
+const payload = {
+  user_id: {{ auth()->user()->id }},
+  post_id: {{ $post->id }},
+}
+const commentWrapper = $data('comments');
+
 let commentData = @json($post->comments);
 commentData.sort((c1, c2) => (c1.created_at - c2.created_at));
 
-const commentInput = $data('comment-input');
-const submitBtn = $data('submit-btn');
-const cancelBtn = $data('cancel-btn');
+
 let typingTimeout;
 
-function typing() {
+function typing(target) {
   clearTimeout(typingTimeout);
 
+  const parent = target.parentNode;
+  const submitBtn = parent.querySelector('[data-submit-btn]');
+  const cancelBtn = parent.querySelector('[data-cancel-btn]');
+
   typingTimeout = setTimeout(() => {
-    if (commentInput.value.length > 0) {
+    if (target.value.length > 0) {
       enable(submitBtn);
       enable(cancelBtn);
       return;
@@ -275,38 +284,38 @@ function typing() {
 }
 
 
-const commentWrapper = $data('comments');
-
 // Placeholder for incoming comment.
 const loading = document.createElement('li');
 loading.innerHTML = '<li class="border px-2 pt-1 mb-2">Loading...</li>';
 
-function storeComment() {
+function storeComment(btn) {
+  const parent = btn.parentNode;
+  const commInput = parent.querySelector('[data-comment-input]');
+  const submitBtn = parent.querySelector('[data-submit-btn]');
+  const cancelBtn = parent.querySelector('[data-cancel-btn]');
+
   // Preparing backup to anticipate fails when storing comment.
   const tempCommentData = commentData;
-  const token   = $('input[name="_token"]');
   const headers = {
     'Content-Type': 'application/json',
     'X-CSRF-TOKEN': token.value,
   }
-  const body = JSON.stringify({
-    user_id: {{ auth()->user()->id }},
-    post_id: {{ $post->id }},
-    body: commentInput.value,
-  });
+  payload.body = commInput.value;
 
   commentWrapper.prepend(loading);
 
-  disable(commentInput);
+  disable(commInput);
   disable(submitBtn);
 
   fetch("{{ route('comments.store') }}", {
-    headers, method: 'POST', body,
+    headers,
+    method: 'POST',
+    body: JSON.stringify(payload),
   }).then(res => res.json())
     .then(json => {
       // Update commentData.
       commentData = json.comments;
-      commentInput.value = '';
+      commInput.value = '';
       disable(cancelBtn);
     })
     .catch(err => {
@@ -319,15 +328,20 @@ function storeComment() {
       enable(submitBtn);
     })
     .finally(() => {
-      enable(commentInput);
+      enable(commInput);
 
       renderComment();
     });
 }
 
 // Reset comment input.
-function cancelComment() {
-  commentInput.value = '';
+function cancelComment(btn) {
+  const parent = btn.parentNode;
+  const commInput = parent.querySelector('[data-comment-input]');
+  const submitBtn = parent.querySelector('[data-submit-btn]');
+  const cancelBtn = parent.querySelector('[data-cancel-btn]');
+
+  commInput.value = '';
 
   disable(submitBtn);
   disable(cancelBtn);
@@ -371,6 +385,7 @@ function renderComment() {
   commentWrapper.innerHTML = content;
 }
 
+
 // const commentReplyInput = $('#comment-reply');
 
 function createReply(btn) {
@@ -389,16 +404,20 @@ function storeReply({ target }) {
   {{-- fetch("{{ route('replies.store') }}") --}}
 }
 
+
 function editComment(btn) {
   const parent = btn.parentNode;
   const deleteBtn = parent.querySelector('[data-delete-btn]');
-  const saveBtn   = parent.querySelector('[data-save-btn]');
-  const cancelBtn = parent.querySelector('[data-cancel-edit-btn]');
+  const saveBtn   = parent.querySelector('[data-submit-btn]');
+  const cancelBtn = parent.querySelector('[data-cancel-btn]');
 
   hide(btn);
   hide(deleteBtn);
   show(saveBtn);
   show(cancelBtn);
+
+  const p = parent.querySelector('p');
+  p.outerHTML = '<textarea class="form-control mb-2" placeholder="Write a comment..." oninput="typing(this)" data-comment-input></textarea>';
 }
 
 function updateComment(btn) {
@@ -407,7 +426,7 @@ function updateComment(btn) {
 
 function cancelEdit(btn) {
   const parent = btn.parentNode;
-  const saveBtn   = parent.querySelector('[data-save-btn]');
+  const saveBtn   = parent.querySelector('[data-submit-btn]');
   const editBtn   = parent.querySelector('[data-edit-btn]');
   const deleteBtn = parent.querySelector('[data-delete-btn]');
 
@@ -445,6 +464,7 @@ function cancelDelete(btn) {
   show(editBtn);
   show(deleteBtn);
 }
+
 
 </script>
 @endpush
