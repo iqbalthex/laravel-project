@@ -18,6 +18,9 @@ Route::middleware('auth')->group(function () {
 
   Route::resource('categories', CategoryController::class);
 
-  Route::patch('/comments/{comment?}', [CommentController::class, 'update'])->name('comments.update');
-  Route::resource('comments', CommentController::class)->only(['store', 'destroy']);
+  Route::controller(CommentController::class)->prefix('/comments')->name('comments.')->group(function () {
+    Route::post('/', 'store')->name('store');
+    Route::patch('/{comment?}', 'update')->name('update');
+    Route::delete('/{comment?}', 'destroy')->name('destroy');
+  });
 });

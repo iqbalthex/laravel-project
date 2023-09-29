@@ -42,7 +42,7 @@ class CommentController extends Controller {
       DB::commit();
 
       return response([
-        'comments' => $this->fetchComments($comment->user_id, $comment->post_id),
+        'comments' => $this->fetchComments($request->user_id, $request->post_id),
       ], 201);
 
     } catch (\Exception $e) {
@@ -68,6 +68,7 @@ class CommentController extends Controller {
   public function update(Request $request, ?Comment $comment): Response {
     $validator = Validator::make($request->all(), [
       'user_id' => ['required', 'integer'],
+      'post_id' => ['required', 'integer'],
       'body'    => ['required', 'string'],
     ]);
 
@@ -89,7 +90,7 @@ class CommentController extends Controller {
       DB::commit();
 
       return response([
-        'comments' => $this->fetchComments($comment->user_id, $comment->post_id),
+        'comments' => $this->fetchComments($request->user_id, $request->post_id),
       ], 200);
 
     } catch (\Exception $e) {
@@ -108,8 +109,44 @@ class CommentController extends Controller {
   /**
    * Remove the specified resource from storage.
    */
-  public function destroy(Comment $comment) {
-    //
+  public function destroy(Request $request, ?Comment $comment) {
+    $validator = Validator::make($request->all(), [
+      'user_id'    => ['required', 'integer'],
+      'post_id'    => ['required', 'integer'],
+    ]);
+
+    // Return error when fails to validate the request.
+    if ($validator->stopOnFirstFailure()->fails()) {
+      return response([
+        'error' => $validator->errors()->first(),
+      ], 400);
+    }
+
+    // Return error when user is not allowed to modify comment.
+    if (User::find($request->user_id)->cannot('modify', $comment)) {
+      abort(403);
+    }
+
+    DB::beginTransaction();
+    try {
+      $comment->delete();
+      DB::commit();
+
+      return response([
+        'comments' => $this->fetchComments($request->user_id, $request->post_id),
+      ], 200);
+
+    } catch (\Exception $e) {
+      DB::rollBack();
+
+      $error = $e->getMessage();
+      return response(compact('error'), 500);
+
+    } finally {
+      $comment->makeHidden(['created_at', 'updated_at', 'created', 'updated']);
+
+      Log::info('Comment deleted', compact('comment'));
+    }
   }
 
   /**

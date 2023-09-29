@@ -251,7 +251,10 @@
 @push('scripts')
 <script>
 
-const token = $('input[name="_token"]');
+const headers = {
+  'Content-Type': 'application/json',
+  'X-CSRF-TOKEN': $('input[name="_token"]').value,
+}
 const payload = {
   user_id: {{ auth()->user()->id }},
   post_id: {{ $post->id }},
@@ -294,16 +297,12 @@ function storeComment(btn) {
 
   // Preparing backup to anticipate fails when storing comment.
   const tempCommentData = commentData;
-  const headers = {
-    'Content-Type': 'application/json',
-    'X-CSRF-TOKEN': token.value,
-  }
-  payload.body = commInput.value;
 
   commentWrapper.prepend(loading);
-
   disable(commInput);
   disable(submitBtn);
+  
+  payload.body = commInput.value;
 
   fetch("{{ route('comments.store') }}", {
     headers,
@@ -374,7 +373,7 @@ function renderComment() {
       <button class="btn btn-secondary mb-2 px-2 py-0 d-none" onclick="cancelDelete(this)" data-cancel-delete-btn>Cancel</button>
     ` : '';
 
-    content += `<li class="border px-2 pt-1 mb-2">
+    content += `<li class="border px-2 pt-1 mb-2" data-comment-id="${comment.id}">
       <h6 class="d-flex justify-content-between">
         <span>
           ${comment.user.name}
@@ -393,8 +392,6 @@ function renderComment() {
 }
 
 
-// const commentReplyInput = $('#comment-reply');
-
 function createReply(btn) {
   const comment   = btn.parentNode;
   const commentId = comment.dataset.commentId;
@@ -408,7 +405,7 @@ function createReply(btn) {
 }
 
 function storeReply({ target }) {
-  {{-- fetch("{{ route('replies.store') }}") --}}
+  
 }
 
 
@@ -440,16 +437,12 @@ function updateComment(btn) {
 
   // Preparing backup to anticipate fails when storing comment.
   const tempCommentData = commentData;
-  const headers = {
-    'Content-Type': 'application/json',
-    'X-CSRF-TOKEN': token.value,
-  }
-  payload.body = commInput.value;
 
   commentWrapper.prepend(loading);
-
   disable(commInput);
   disable(submitBtn);
+
+  payload.body = commInput.value;
 
   fetch(`{{ route('comments.update') }}/${parent.dataset.commentId}`, {
     headers,
@@ -469,13 +462,13 @@ function updateComment(btn) {
       disable(cancelBtn);
     })
     .catch(err => {
-      // if (err instanceof Exception) {
+      // if (err instanceof ForbiddenException) {
         
       // }
 
       console.error(err);
 
-      // Backup commentData.
+      Backup commentData.
       commentData = tempCommentData;
       commentWrapper.removeChild(loading);
 
@@ -521,7 +514,37 @@ function deleteComment(btn) {
 }
 
 function destroyComment(btn) {
-  
+  const parent = btn.parentNode;
+  const destroyBtn = parent.querySelector('[data-destroy-btn]');
+  const cancelBtn  = parent.querySelector('[data-cancel-delete-btn]');
+
+  disable(destroyBtn);
+
+  fetch(`{{ route('comments.destroy') }}/${parent.dataset.commentId}`, {
+    headers,
+    method: 'DELETE',
+    body: JSON.stringify(payload),
+  }).then(res => {
+    // if (res.status === 403) {
+      // throw new Exception('You aren\'t allowed to modify this comment.');
+    // }
+
+    return res.json();
+  })
+    .then(json => {
+      // Update commentData.
+      commentData = json.comments;
+    })
+    .catch(err => {
+      // if (err instanceof ForbiddenException) {
+        
+      // }
+
+      console.error(err);
+    })
+    .finally(() => {
+      renderComment();
+    });
 }
 
 function cancelDelete(btn) {
